@@ -51,11 +51,42 @@ class User extends Authenticatable
     ];
 
     /**
-     * Obtém os eventos criados pelo usuário.
+     * Get the events that the user has created.
      * @return HasMany
      */
-    public function createdEvents(): HasMany
+    public function events(): HasMany
     {
         return $this->hasMany(Event::class, 'user_id');
+    }
+
+    /**
+     * Get the teams that the user belongs to.
+     * @return array
+     */
+    public function myTeams(): array
+    {
+        $modelPermissions = User::where('users.id', $this->id)
+            ->where('model_type', User::class)
+            ->join('model_has_permissions','model_has_permissions.model_id', '=', 'users.id')
+            ->join('teams','teams.id', '=', 'model_has_permissions.team_id')
+            ->groupBy('team_id')->get('team_id');
+        $modelRoles = User::where('users.id', $this->id)
+            ->where('model_type', User::class)
+            ->join('model_has_roles','model_has_roles.model_id', '=', 'users.id')
+            ->groupBy('team_id')->get('team_id');
+        return Team::whereIn('id', $modelPermissions->pluck('team_id')
+            ->concat($modelRoles->pluck('team_id'))
+            ->unique())
+            ->get()
+            ->toArray();
+    }
+
+    /**
+     * Get the teams that the user belongs to.
+     * @return HasMany
+     */
+    public function teams(): HasMany
+    {
+        return $this->hasMany(Team::class, 'user_id');
     }
 }
