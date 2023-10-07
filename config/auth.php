@@ -111,5 +111,8 @@ return [
     */
 
     'password_timeout' => 10800,
-
+    'teams' => [
+        'driver' => 'eloquent',
+        'model' => App\Models\Team::class,
+    ],
 ];
