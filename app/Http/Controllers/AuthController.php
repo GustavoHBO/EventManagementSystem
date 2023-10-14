@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Business\UserBusiness;
 use App\Http\Resources\UserResource;
 use App\Models\User;
+use Crypt;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -43,8 +44,13 @@ class AuthController extends Controller
         if (Auth::attempt(['email' => $paramsValidated['email'], 'password' => $paramsValidated['password']])) {
             $user = User::where('email', $paramsValidated['email'])->first();
             $token = $user->createToken('auth_token')->plainTextToken;
-
-            return $this->sendSuccessResponse(['access_token' => $token, 'user' => $user->only(['id', 'name', 'email'])]);
+            // Encrypt the team ID to be sent to the frontend.
+            $additionalData = Crypt::encrypt(['team_id' => $user->myTeams()->first()->id ?? null]);
+            return $this->sendSuccessResponse([
+                'access_token' => $token,
+                'additional_data' => $additionalData,
+                'user' => $user->only(['id', 'name', 'email'])
+            ]);
         }
 
         return $this->sendErrorResponse(['message' => 'Unauthorized'], 401);
