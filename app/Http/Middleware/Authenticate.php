@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use Closure;
+use Crypt;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Auth\Middleware\Authenticate as Middleware;
 use Illuminate\Http\Request;
@@ -15,7 +16,9 @@ class Authenticate extends Middleware
      */
     public function handle($request, Closure $next, ...$guards)
     {
-//        session(['team_id' => 0]); // Modify this to get the team_id from the request.
+        $additionalData = Crypt::decrypt($request->header('Additional-Data'));
+        $teamId = $additionalData['team_id'] ?? null;
+        session(['team_id' => $teamId]);
         return parent::handle($request, $next, ...$guards);
     }
 
