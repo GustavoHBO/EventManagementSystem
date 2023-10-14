@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Collection;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
 
@@ -61,24 +62,18 @@ class User extends Authenticatable
 
     /**
      * Get the teams that the user belongs to.
-     * @return array
+     * @return Collection
      */
-    public function myTeams(): array
+    public function myTeams(): Collection
     {
-        $modelPermissions = User::where('users.id', $this->id)
-            ->where('model_type', User::class)
-            ->join('model_has_permissions','model_has_permissions.model_id', '=', 'users.id')
-            ->join('teams','teams.id', '=', 'model_has_permissions.team_id')
-            ->groupBy('team_id')->get('team_id');
-        $modelRoles = User::where('users.id', $this->id)
-            ->where('model_type', User::class)
-            ->join('model_has_roles','model_has_roles.model_id', '=', 'users.id')
-            ->groupBy('team_id')->get('team_id');
-        return Team::whereIn('id', $modelPermissions->pluck('team_id')
-            ->concat($modelRoles->pluck('team_id'))
-            ->unique())
-            ->get()
-            ->toArray();
+        $modelPermissions = User::where('users.id', $this->id)->where('model_type',
+            User::class)->join('model_has_permissions', 'model_has_permissions.model_id', '=',
+            'users.id')->join('teams', 'teams.id', '=',
+            'model_has_permissions.team_id')->groupBy('team_id')->get('team_id');
+        $modelRoles = User::where('users.id', $this->id)->where('model_type', User::class)->join('model_has_roles',
+            'model_has_roles.model_id', '=', 'users.id')->groupBy('team_id')->get('team_id');
+        return Team::whereIn('id',
+            $modelPermissions->pluck('team_id')->concat($modelRoles->pluck('team_id'))->unique())->get();
     }
 
     /**

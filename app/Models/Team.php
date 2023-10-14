@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
+use App\Http\Business\RolePermissionBusiness;
+use Auth;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Spatie\Permission\Models\Role;
 
 /**
  * @mixin IdeHelperTeam
@@ -34,7 +37,17 @@ class Team extends Model
             // set actual new team_id to package instance
             setPermissionsTeamId($model);
             // get the admin user and assign roles/permissions on new team model
-            User::find(1)->assignRole('super-admin');
+            RolePermissionBusiness::copyDefaultRolesAndPermissions($model);
+//            dd(Role::where('team_id', $model->id)->get()->toArray());
+//            $role = Role::where('team_id', $model->id)->where('name', 'super admin')->first();
+//            dd(Role::where('team_id', $model->id)->get()->toArray());
+//            dd(Auth::user()->roles);
+            $role = Role::where('name', 'super admin')->first();
+            if($role){
+                $user = Auth::user() ?? User::find(1);
+                $user->assignRole('super admin');
+            }
+//            Auth::user()->assignRole('super admin');
             // restore session team_id to package instance using temporary value stored above
             setPermissionsTeamId($session_team_id);
         });
