@@ -2,6 +2,8 @@
 
 namespace Database\Seeders;
 
+use App\Models\Team;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
@@ -19,49 +21,93 @@ class BasicPermissionSeeder extends Seeder
 
         // create permissions
         $permissions = [
+            // Users
+            'user create',
+            'user list',
+            'user edit',
+            'user delete',
+            'user manage',
+            'access admin panel',
+
+            // Teams
+            'team create',
+            'team list',
+            'team delete',
+            // Events
+            'event manage',
+            'event create',
+            'event update',
+            'event delete',
+            'event manage banners',
+            'event receive notifications',
+            // Tickets
+            'ticket create',
+            'ticket list',
+            'ticket delete',
+            'ticket configure sales',
+            // Sales
+            'sale receive notifications',
+            // Permissions
+            'permission manage',
             'permission list',
             'permission create',
             'permission edit',
             'permission delete',
+            // Roles
             'role list',
             'role create',
             'role edit',
-            'role delete',
-            'user list',
-            'user create',
-            'user edit',
-            'user delete'
+            'role delete'
         ];
+
+        $team = Team::create(['name' => 'default', 'user_id' => 1]);
+
         foreach ($permissions as $permission) {
             Permission::create(['name' => $permission]);
         }
         // create roles and assign existing permissions
-        $role1 = Role::create(['name' => 'writer']);
-        $role1->givePermissionTo('permission list');
-        $role1->givePermissionTo('role list');
-        $role1->givePermissionTo('user list');
-        $role2 = Role::create(['name' => 'admin']);
+        $roleSuperAdm = Role::create(['name' => 'super admin', 'team_id' => $team->id]);
 
+        // Give the role the permissions.
         foreach ($permissions as $permission) {
-            $role2->givePermissionTo($permission);
+            $roleSuperAdm->givePermissionTo($permission);
         }
-        $role3 = Role::create(['name' => 'super-admin']);
-        // gets all permissions via Gate::before rule; see AuthServiceProvider
-        // create demo users
-//        $user = User::factory()->create([
-//            'name' => 'Super Admin',
-//            'email' => 'superadmin@example.com',
-//        ]);
-//        $user->assignRole($role3);
-//        $user = User::factory()->create([
-//            'name' => 'Admin User',
-//            'email' => 'admin@example.com',
-//        ]);
-//        $user->assignRole($role2);
-//        $user = User::factory()->create([
-//            'name' => 'Example User',
-//            'email' => 'test@example.com',
-//        ]);
-//        $user->assignRole($role1);
+
+        // Create roles and permissions to producers.
+        $roleProducer = Role::create(['name' => 'producer', 'team_id' => $team->id]);
+        $permissionsProducer = [
+            'event manage',
+            'event create',
+            'event update',
+            'event delete',
+            'event manage banners',
+            'event receive notifications',
+            'ticket create',
+            'ticket list',
+            'ticket delete',
+            'ticket configure sales',
+            'sale receive notifications',
+        ];
+        foreach ($permissionsProducer as $permission) {
+            $roleProducer->givePermissionTo($permission);
+        }
+
+        // Create roles and permissions to clients.
+        $roleClient = Role::create(['name' => 'client', 'team_id' => $team->id]);
+        $permissionsClient = [
+            'event receive notifications',
+            'ticket create',
+            'ticket list',
+            'ticket delete',
+            'sale receive notifications',
+        ];
+        foreach ($permissionsClient as $permission) {
+            $roleClient->givePermissionTo($permission);
+        }
+
+        // Give the user the role.
+        setPermissionsTeamId($team->id);
+        $user = User::find(1);
+        $user->assignRole($roleSuperAdm);
     }
 }
