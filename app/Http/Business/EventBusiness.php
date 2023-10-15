@@ -21,10 +21,21 @@ class EventBusiness
         'user_id' => 'required|exists:users,id',
         'team_id' => 'required|exists:teams,id',
         'name' => 'required|string|max:255',
-        'capacity' => 'required|integer|min:1',
         'datetime' => 'required|date',
         'location' => 'required|string|max:255',
-        'banner' => 'required|string|max:255',
+        'banner' => [
+            'required',
+            'regex:/^data:image\/(jpeg|jpg|png|gif|webp);base64,/i',
+            'max:'. 5 * (10 ** 6) // Maximum image size in bytes (e.g., 10MB)
+        ],
+        'lots' => 'required|array|min:1',
+        'lots.*.name' => 'required|string|max:255',
+        'lots.*.available_tickets' => 'required|integer|min:0',
+        'lots.*.expiration_date' => 'required|date|date_format:Y-m-d',
+        'lots.*.ticket_prices' => 'required|array|min:1',
+        'lots.*.ticket_prices.*.sector_id' => 'required_without:lots.*.ticket_prices.*.sector|exists:sectors,id',
+        'lots.*.ticket_prices.*.sector' => 'required_without:lots.*.ticket_prices.*.sector_id',
+        'lots.*.ticket_prices.*.price' => 'required|numeric|min:0'
     ];
 
     // Messages to be returned when validation fails.
@@ -33,23 +44,42 @@ class EventBusiness
         'user_id.exists' => 'O usuário especificado não existe.',
         'team_id.required' => 'O campo team_id é obrigatório.',
         'team_id.exists' => 'O time especificado não existe.',
-        'capacity.required' => 'O campo capacidade é obrigatório.',
-        'capacity.integer' => 'O campo capacidade deve ser um número inteiro.',
-        'capacity.min' => 'O campo capacidade deve ser no mínimo 1.',
         'name.required' => 'O campo nome é obrigatório.',
         'name.max' => 'O campo nome não pode ter mais de 255 caracteres.',
         'datetime.required' => 'O campo data e hora é obrigatório.',
         'datetime.date' => 'O campo data e hora deve ser uma data e hora válida.',
         'location.required' => 'O campo localização é obrigatório.',
         'location.max' => 'O campo localização não pode ter mais de 255 caracteres.',
+        'banner.regex' => 'O formato do banner não é suportado.',
         'banner.required' => 'O campo banner é obrigatório.',
-        'banner.max' => 'O campo banner não pode ter mais de 255 caracteres.', // Ajuste o tamanho conforme necessário
+        'banner.max' => 'O campo banner não deve exceder 5MB de tamanho.',
+        'lots.required' => 'Pelo menos um lote é obrigatório.',
+        'lots.array' => 'Os lotes devem ser um array.',
+        'lots.*.name.required' => 'O nome do lote é obrigatório.',
+        'lots.*.name.string' => 'O nome do lote deve ser uma string.',
+        'lots.*.name.max' => 'O nome do lote não pode exceder 255 caracteres.',
+        'lots.*.available_tickets.required' => 'Os ingressos disponíveis para o lote são obrigatórios.',
+        'lots.*.available_tickets.integer' => 'Os ingressos disponíveis devem ser um número inteiro.',
+        'lots.*.available_tickets.min' => 'Os ingressos disponíveis devem ser um número inteiro não negativo.',
+        'lots.*.expiration_date.required' => 'A data de validade do lote é obrigatória.',
+        'lots.*.expiration_date.date' => 'A data de validade do lote deve ser uma data válida.',
+        'lots.*.expiration_date.date_format' => 'A data de validade do lote deve estar no formato Y-m-d.',
+        'lots.*.ticket_prices.required' => 'Pelo menos um preço de ingresso é obrigatório para cada lote.',
+        'lots.*.ticket_prices.array' => 'Os preços de ingressos devem ser um array para cada lote.',
+        'lots.*.ticket_prices.*.sector_id.required' => 'O ID do setor é obrigatório para cada preço de ingresso.',
+        'lots.*.ticket_prices.*.sector_id.integer' => 'O ID do setor deve ser um número inteiro para cada preço de ingresso.',
+        'lots.*.ticket_prices.*.sector_id.exists' => 'O setor informado não existe.',
+        'lots.*.ticket_prices.*.sector_id.required_without' => 'Especifique um ID de setor ou forneça dados para criar um novo setor.',
+        'lots.*.ticket_prices.*.sector.required_without' => 'Especifique um setor ou forneça um ID de setor existente.',
+        'lots.*.ticket_prices.*.price.required' => 'O preço é obrigatório para cada preço de ingresso.',
+        'lots.*.ticket_prices.*.price.numeric' => 'O preço deve ser um valor numérico para cada preço de ingresso.',
+        'lots.*.ticket_prices.*.price.min' => 'O preço deve ser um valor numérico não negativo para cada preço de ingresso.'
     ];
 
     /**
      * Create a new Event instance and return it.
-     * @throws ValidationException
-     * @throws Throwable
+     * @throws ValidationException - If the data is invalid.
+     * @throws Throwable - If the transaction fails.
      */
     public static function createEvent($data): Model|Event
     {
@@ -58,13 +88,13 @@ class EventBusiness
         $event = null;
         DB::transaction(function () use ($validParams, &$event) {
             $bannerPath = 'banners';
-            $event = Event::create($validParams);
             // Make the upload of the banner.
             if (isset($validParams['banner'])) {
                 // Generate a UUID for the banner.
                 $uuid = Str::uuid();
                 if (Storage::put("/$bannerPath/$uuid", $validParams['banner'])) {
-                    $event->banner = $uuid;
+                    $validParams['banner'] = $uuid;
+                    $event = Event::create($validParams);
                     try {
                         $event->save(); // Save the event.
                     } catch (Throwable $e) { // If the save fails, delete the banner and throw an exception.
@@ -76,6 +106,25 @@ class EventBusiness
                     }
                 } else { // If the upload fails, rollback the transaction and throw an exception.
                     throw new CreateEventException('Não foi possível fazer o upload do banner!');
+                }
+            }
+
+            // Insert the lots.
+            foreach ($validParams['lots'] as $lot) {
+                $lot['event_id'] = $event->id;
+                $lotCreated = LotBusiness::createLot($lot);
+                $sector = null;
+                foreach ($lot['ticket_prices'] as $ticketPrice) {
+
+                    if (isset($ticketPrice['sector'])) {
+                        $sector = SectorBusiness::createSector($ticketPrice['sector']);
+                    } elseif (isset($ticketPrice['sector_id'])) {
+                        $sector = SectorBusiness::getSectorById($ticketPrice['sector_id']);
+                    }
+                    LotBusiness::attachSector($lotCreated, $sector);
+                    $ticketPrice['sector_id'] = $sector->id ?? null;
+                    $ticketPrice['lot_id'] = $lotCreated->id;
+                    TicketBusiness::createTicketPrice($ticketPrice);
                 }
             }
         }, 2); // The second parameter is the number of times the transaction should be retried.

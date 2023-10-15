@@ -3,9 +3,10 @@
 namespace App\Http\Business;
 
 use App\Models\Lot;
+use App\Models\LotSector;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
-use Ramsey\Uuid\Type\Integer;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 
 class LotBusiness
@@ -40,7 +41,7 @@ class LotBusiness
      */
     public static function createLot(array $data): Lot
     {
-        BaseBusiness::hasPermissionTo('create lots');
+        BaseBusiness::hasPermissionTo('lot create');
         // Verify if the data is valid
         $validatedParams = Validator::validate($data, LotBusiness::rules, LotBusiness::messages);
 
@@ -50,13 +51,13 @@ class LotBusiness
 
     /**
      * Update a lot and return it.
-     * @param  Integer  $id - Lot ID.
+     * @param  int  $id  - Lot ID.
      * @param  array  $data  - Lot data.
      * @return Lot - Lot updated.
      */
-    public static function updateLot(Integer $id, array $data): Lot
+    public static function updateLot(int $id, array $data): Lot
     {
-        BaseBusiness::hasPermissionTo('update lots');
+        BaseBusiness::hasPermissionTo('lot edit');
         $lot = Lot::find($id);
         $lot->update($data);
         return $lot;
@@ -64,12 +65,12 @@ class LotBusiness
 
     /**
      * Delete a lot and return it.
-     * @param  Integer  $id - Lot ID.
+     * @param  int  $id  - Lot ID.
      * @return Lot - Lot deleted.
      */
-    public static function deleteLot(Integer $id): Lot
+    public static function deleteLot(int $id): Lot
     {
-        BaseBusiness::hasPermissionTo('delete lots');
+        BaseBusiness::hasPermissionTo('lot delete');
         $lot = Lot::find($id);
         $lot->delete();
         return $lot;
@@ -77,13 +78,13 @@ class LotBusiness
 
     /**
      * Get a lot by ID.
-     * @param  Integer  $id - Lot ID.
+     * @param  int  $id  - Lot ID.
      * @return Lot - Lot found.
      * @throws UnauthorizedException - If the user does not have permission to view lots.
      */
-    public static function getLotById(Integer $id): Lot
+    public static function getLotById(int $id): Lot
     {
-        BaseBusiness::hasPermissionTo('view lots');
+        BaseBusiness::hasPermissionTo('lot list');
         return Lot::find($id);
     }
 
@@ -94,7 +95,21 @@ class LotBusiness
      */
     public static function getAllLots(): array
     {
-        BaseBusiness::hasPermissionTo('view lots');
+        BaseBusiness::hasPermissionTo('lot list');
         return Lot::all()->toArray();
+    }
+
+    /**
+     * Attach a sector to a lot.
+     * @param $lot  - Lot to attach the sector.
+     * @param $sector  - Sector to be attached to the lot.
+     * @return LotSector|Model - LotSector created.
+     */
+    public static function attachSector($lot, $sector): Model|LotSector
+    {
+        return LotSector::firstOrCreate([
+            'lot_id' => $lot->id,
+            'sector_id' => $sector->id
+        ]);
     }
 }
