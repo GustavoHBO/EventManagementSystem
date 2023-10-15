@@ -24,10 +24,25 @@ class EventController extends Controller
 //        $events = Event::all();
 
         // Get the available events.
-        $events = EventBusiness::getAvailableEvents();
-        $events = EventBusiness::getMyEditableEvents();
-
-        return $this->sendSuccessResponse(new EventResource($events), 'Eventos recuperados com sucesso!');
+        $events = EventBusiness::getAvailableEvents()->paginate();
+//        $events = EventBusiness::getMyEditableEvents();
+        return $this->sendSuccessResponse([
+            'events' => EventResource::collection($events),
+            'meta' => [
+                'current_page' => $events->currentPage(),
+                'from' => $events->firstItem(),
+                'last_page' => $events->lastPage(),
+                'per_page' => $events->perPage(),
+                'to' => $events->lastItem(),
+                'total' => $events->total(),
+            ],
+            'links' => [
+                'first' => $events->url(1),
+                'last' => $events->url($events->lastPage()),
+                'next' => $events->nextPageUrl(),
+                'prev' => $events->previousPageUrl(),
+            ],
+        ], 'Eventos recuperados com sucesso!');
     }
 
     /**

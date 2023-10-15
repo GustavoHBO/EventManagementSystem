@@ -175,11 +175,11 @@ class EventBusiness
 
     /**
      * Get the events that are available.
-     * @return array|Collection - Events available.
+     * @return Builder|Event - Events available.
      */
-    public static function getAvailableEvents(): array|Collection
+    public static function getAvailableEvents(): Event|Builder
     {
-        return Event::where('datetime', '>=', now())->get();
+        return Event::where('datetime', '>=', now());
     }
 
     /**
