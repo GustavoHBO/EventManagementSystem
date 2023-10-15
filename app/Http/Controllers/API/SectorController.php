@@ -19,7 +19,7 @@ class SectorController extends Controller
     public function index(): JsonResponse
     {
         // Get all sectors using the SectorBusiness class
-        if (!Auth::user()->hasPermissionTo('view sectors')) {
+        if (!Auth::user()->hasPermissionTo('sector list')) {
             return $this->sendErrorResponse('Você não tem permissão para visualizar os setores!', 403);
         }
         $sectors = SectorBusiness::getMySectors();
@@ -33,7 +33,7 @@ class SectorController extends Controller
      */
     public function store(Request $request): JsonResponse
     {
-        if (!Auth::user()->hasPermissionTo('create sectors')) {
+        if (!Auth::user()->hasPermissionTo('sector create')) {
             return $this->sendErrorResponse('Você não tem permissão para criar setores!', 403);
         }
 
@@ -53,7 +53,7 @@ class SectorController extends Controller
      */
     public function update(Request $request, Sector $sector): JsonResponse
     {
-        if (!Auth::user()->hasPermissionTo('edit sectors')) {
+        if (!Auth::user()->hasPermissionTo('sector edit')) {
             return $this->sendErrorResponse('Você não tem permissão para editar setores!', 403);
         }
         // Update the sector using the SectorBusiness class
@@ -73,7 +73,7 @@ class SectorController extends Controller
      */
     public function destroy(Sector $sector): JsonResponse
     {
-        if (!Auth::user()->hasPermissionTo('delete sectors')) {
+        if (!Auth::user()->hasPermissionTo('sector delete')) {
             return $this->sendErrorResponse('Você não tem permissão para deletar setores!', 403);
         }
         // Delete the sector using the SectorBusiness class
