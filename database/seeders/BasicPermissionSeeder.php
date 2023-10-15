@@ -28,7 +28,6 @@ class BasicPermissionSeeder extends Seeder
             'user delete',
             'user manage',
             'access admin panel',
-
             // Teams
             'team create',
             'team list',
@@ -40,7 +39,18 @@ class BasicPermissionSeeder extends Seeder
             'event delete',
             'event manage banners',
             'event receive notifications',
+            // Sectors
+            'sector create',
+            'sector list',
+            'sector edit',
+            'sector delete',
+            // Lots
+            'lot create',
+            'lot list',
+            'lot edit',
+            'lot delete',
             // Tickets
+            'ticket prices create',
             'ticket create',
             'ticket list',
             'ticket delete',
@@ -61,12 +71,13 @@ class BasicPermissionSeeder extends Seeder
         ];
 
         $team = Team::create(['name' => 'default', 'user_id' => 1]);
+        setPermissionsTeamId($team->id);
 
         foreach ($permissions as $permission) {
-            Permission::create(['name' => $permission]);
+            Permission::findOrCreate($permission);
         }
         // create roles and assign existing permissions
-        $roleSuperAdm = Role::create(['name' => 'super admin', 'team_id' => $team->id]);
+        $roleSuperAdm = Role::findOrCreate('super admin');
 
         // Give the role the permissions.
         foreach ($permissions as $permission) {
@@ -74,7 +85,8 @@ class BasicPermissionSeeder extends Seeder
         }
 
         // Create roles and permissions to producers.
-        $roleProducer = Role::create(['name' => 'producer', 'team_id' => $team->id]);
+        $roleProducer = Role::findOrCreate('producer');
+
         $permissionsProducer = [
             'event manage',
             'event create',
@@ -93,7 +105,8 @@ class BasicPermissionSeeder extends Seeder
         }
 
         // Create roles and permissions to clients.
-        $roleClient = Role::create(['name' => 'client', 'team_id' => $team->id]);
+        $roleClient = Role::findOrCreate('client');
+
         $permissionsClient = [
             'event receive notifications',
             'ticket create',
@@ -106,7 +119,6 @@ class BasicPermissionSeeder extends Seeder
         }
 
         // Give the user the role.
-        setPermissionsTeamId($team->id);
         $user = User::find(1);
         $user->assignRole($roleSuperAdm);
     }
