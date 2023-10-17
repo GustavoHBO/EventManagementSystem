@@ -15,7 +15,6 @@ class EventResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'teste'=> 'teste',
             'id' => $this->id,
             'name' => $this->name,
             'lots' => LotResource::collection($this->lots),
