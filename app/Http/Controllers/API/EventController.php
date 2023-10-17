@@ -20,6 +20,7 @@ class EventController extends Controller
      */
     public function index(): JsonResponse
     {
+//        dd(new EventResource(Event::find(11)));
         // Get all events.
 //        $events = Event::all();
 
