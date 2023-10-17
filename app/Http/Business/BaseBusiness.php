@@ -15,8 +15,8 @@ class BaseBusiness
      */
     public static function hasPermissionTo(string $permission): void
     {
-        if( Auth::user()->hasPermissionTo($permission)){
-            throw new UnauthorizedException(403, 'You do not have permission to do this.');
+        if(!Auth::user()->hasPermissionTo($permission)){
+            throw new UnauthorizedException(403, 'Você não tem permissão para realizar esta ação.');
         }
     }
 }

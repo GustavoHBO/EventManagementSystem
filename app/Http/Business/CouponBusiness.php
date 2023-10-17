@@ -3,6 +3,7 @@
 namespace App\Http\Business;
 
 use App\Models\Coupon;
+use App\Models\CouponUsage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 use Spatie\Permission\Exceptions\UnauthorizedException;
@@ -112,5 +113,17 @@ class CouponBusiness extends BaseBusiness
     {
         BaseBusiness::hasPermissionTo('view coupons');
         return Coupon::all()->toArray();
+    }
+
+    /**
+     * Verify if the coupon is usable.
+     * @param  Coupon  $coupon  - Coupon to be verified.
+     * @return bool - True if the coupon is usable, false otherwise.
+     */
+    public static function isCouponUsable(Coupon $coupon): bool
+    {
+        // Check if the coupon is usable.
+        return $coupon->max_usages === null || $coupon->max_usages > CouponUsage::where('coupon_id',
+                $coupon->id)->count();
     }
 }

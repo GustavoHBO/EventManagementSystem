@@ -115,7 +115,6 @@ class EventBusiness
                 $lotCreated = LotBusiness::createLot($lot);
                 $sector = null;
                 foreach ($lot['ticket_prices'] as $ticketPrice) {
-
                     if (isset($ticketPrice['sector'])) {
                         $sector = SectorBusiness::createSector($ticketPrice['sector']);
                     } elseif (isset($ticketPrice['sector_id'])) {

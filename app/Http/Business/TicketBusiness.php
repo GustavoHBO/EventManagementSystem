@@ -60,7 +60,7 @@ class TicketBusiness extends BaseBusiness
      */
     public static function createTicket($data): Ticket
     {
-        BaseBusiness::hasPermissionTo('create tickets');
+        BaseBusiness::hasPermissionTo('ticket create');
         $validParams = Validator::validate($data, TicketBusiness::rulesCreateTicket,
             TicketBusiness::messagesCreateTicket);
         return Ticket::create($validParams);
@@ -74,7 +74,7 @@ class TicketBusiness extends BaseBusiness
      */
     public static function updateTicket($id, $data): Ticket
     {
-        BaseBusiness::hasPermissionTo('update tickets');
+        BaseBusiness::hasPermissionTo('ticket edit');
         $ticket = Ticket::find($id);
         $ticket->update($data);
         return $ticket;
@@ -87,7 +87,7 @@ class TicketBusiness extends BaseBusiness
      */
     public static function deleteTicket(int $id): Ticket
     {
-        BaseBusiness::hasPermissionTo('delete tickets');
+        BaseBusiness::hasPermissionTo('ticket delete');
         $ticket = Ticket::find($id);
         $ticket->delete();
         return $ticket;
@@ -101,7 +101,7 @@ class TicketBusiness extends BaseBusiness
      */
     public static function getTicketById($id): Ticket
     {
-        BaseBusiness::hasPermissionTo('view tickets');
+        BaseBusiness::hasPermissionTo('ticket list');
         return Ticket::find($id);
     }
 
@@ -112,7 +112,7 @@ class TicketBusiness extends BaseBusiness
      */
     public static function getAllTickets(): array
     {
-        BaseBusiness::hasPermissionTo('view tickets');
+        BaseBusiness::hasPermissionTo('ticket list');
         return Ticket::all()->toArray();
     }
 
