@@ -13,12 +13,14 @@ return new class extends Migration
     {
         Schema::create('payments', function (Blueprint $table) {
             $table->id();
-            $table->integer('order_id');
-            $table->integer('payment_method_id');
-            $table->integer('status_id');
+            $table->unsignedBigInteger('payment_method_id');
+            $table->unsignedBigInteger('status_id');
             $table->decimal('amount', 10, 2);
             $table->timestamp('payment_date')->nullable();
             $table->timestamps();
+
+            $table->foreign('status_id')->references('id')->on('payment_statuses');
+            $table->foreign('payment_method_id')->references('id')->on('payment_methods');
         });
     }
 
