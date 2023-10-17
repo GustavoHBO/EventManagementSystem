@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
 /**
  * @mixin IdeHelperSector
@@ -48,6 +49,12 @@ class Sector extends Model
     }
 
     /**
-     * Get the ticket price to this.
+     * Get the tickets that belong to the sector using the ticket price.
+     * @return HasManyThrough - Tickets data.
      */
+    public function tickets(): HasManyThrough
+    {
+        return $this->hasManyThrough(Ticket::class, TicketPrice::class);
+    }
+
 }

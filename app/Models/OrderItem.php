@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 /**
  * @mixin IdeHelperOrderItem
@@ -15,14 +16,12 @@ class OrderItem extends Model
 
     protected $fillable = [
         'order_id',
-        'ticket_id',
-        'quantity',
         'subtotal',
     ];
 
     /**
      * Get the order that owns the OrderItem.
-     * @return BelongsTo
+     * @return BelongsTo - Order that owns the OrderItem.
      */
     public function order(): BelongsTo
     {
@@ -30,11 +29,11 @@ class OrderItem extends Model
     }
 
     /**
-     * Get the ticket that owns the OrderItem.
-     * @return BelongsTo
+     * Get all tickets of the order item.
+     * @return BelongsToMany - Tickets of the order item.
      */
-    public function ticket(): BelongsTo
+    public function tickets(): BelongsToMany
     {
-        return $this->belongsTo(Ticket::class, 'ticket_id');
+        return $this->belongsToMany(Ticket::class, 'ticket_order_item', 'order_item_id', 'ticket_id');
     }
 }

@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 /**
  * @mixin IdeHelperEvent
@@ -38,7 +39,19 @@ class Event extends Model
      */
     public function lots()
     {
-        return $this->hasMany(Lot::class);
+        return $this->hasMany(Lot::class)->orderBy('expiration_date');
+    }
+
+    /**
+     * Get the available lots to sale for the Event.
+     * @return HasOne - Lots data.
+     */
+    public function availableLotsToSale(): HasOne
+    {
+        return $this->hasOne(Lot::class)
+            ->with('tickets')
+            ->where('expiration_date', '>=', now())
+            ->orderBy('expiration_date');
     }
 
     /**
@@ -51,16 +64,7 @@ class Event extends Model
     }
 
     /**
-     * Get the tickets for the Event.
-     * @return HasMany - Tickets data.
-     */
-    public function tickets(): HasMany
-    {
-        return $this->hasMany(Ticket::class);
-    }
-
-    /**
-* Get the ticket prices for the Event.
+     * Get the ticket prices for the Event.
      * @return HasMany - TicketPrices data.
      */
     public function ticketPrices(): HasMany
@@ -75,5 +79,14 @@ class Event extends Model
     public function sectors(): HasMany
     {
         return $this->tickets()->sectors();
+    }
+
+    /**
+     * Get the tickets for the Event.
+     * @return HasMany - Tickets data.
+     */
+    public function tickets(): HasMany
+    {
+        return $this->hasMany(Ticket::class);
     }
 }

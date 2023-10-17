@@ -13,6 +13,12 @@ class Payment extends Model
 {
     use HasFactory;
 
+    // Payment status constants
+    const PENDING = 1; // Payment is pending.
+    const COMPLETED = 2; // Payment is completed.
+    const FAILED = 3; // Payment has failed.
+    const REFUNDED = 4; // Payment has been refunded.
+
     protected $fillable = [
         'order_id',
         'payment_method_id',
