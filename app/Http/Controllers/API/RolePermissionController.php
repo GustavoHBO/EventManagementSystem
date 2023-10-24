@@ -12,6 +12,7 @@ use Request;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
+use Str;
 use Validator;
 
 class RolePermissionController extends Controller
@@ -128,30 +129,68 @@ class RolePermissionController extends Controller
     /**
      * Attach roles to a user and return it.
      * @param  Request  $request  - Request data.
-     * @param $userId  - User ID.
      * @return JsonResponse - User data.
      * @throws ValidationException - If the data is invalid.
      * @throws UnauthorizedException - If the user does not have permission to attach roles to users.
      */
-    public function attachRoles(Request $request, $userId): JsonResponse
+    public function attachRoles(Request $request): JsonResponse
     {
         BaseBusiness::hasPermissionTo('attach roles to users');
         $rules = [
             'roles' => 'required|array',
             'roles.*' => 'required|exists:roles,id',
-            'user_id' => 'required|exists:users,id'
+            'user_email' => 'required|email'
         ];
         $messages = [
             'roles.required' => 'The roles field is required.',
             'roles.array' => 'The roles field must be an array.',
             'roles.*.required' => 'The roles field must contain only valid roles.',
             'roles.*.exists' => 'The roles field must contain only valid roles.',
-            'user_id.required' => 'The user ID field is required.',
-            'user_id.exists' => 'The selected user does not exist in the database.'
+            'user_email.required' => 'The user email field is required.',
+            'user_email.email' => 'The user email field must be a valid email address.'
         ];
         $validParams = Validator::validate($request->all(), $rules, $messages);
-        $user = User::find($userId);
+        $user = User::where('email', $validParams['user_email'])->first();
+        if ($user == null) {
+            $password = Str::password(8);
+            $user = User::create([
+                'email' => $validParams['user_email'],
+                'name' => '',
+                'password' => $password
+            ]);
+        }
         $user->syncRoles($validParams);
         return $this->sendSuccessResponse($user, 'Roles anexadas ao usuário com sucesso!');
+    }
+
+    /**
+     * Detach roles from a user and return it.
+     * @param  Request  $request  - Request data.
+     * @return JsonResponse - User data.
+     * @throws ValidationException - If the data is invalid.
+     */
+    public function detachRoles(Request $request): JsonResponse
+    {
+        BaseBusiness::hasPermissionTo('detach roles from users');
+        $rules = [
+            'roles' => 'required|array',
+            'roles.*' => 'required|exists:roles,id',
+            'user_email' => 'required|email|exists:users,email'
+        ];
+        $messages = [
+            'roles.required' => 'The roles field is required.',
+            'roles.array' => 'The roles field must be an array.',
+            'roles.*.required' => 'The roles field must contain only valid roles.',
+            'roles.*.exists' => 'The roles field must contain only valid roles.',
+            'user_email.required' => 'The user email field is required.',
+            'user_email.email' => 'The user email field must be a valid email address.',
+            'user_email.exists' => 'The selected user email does not exist in the database.'
+        ];
+        $validParams = Validator::validate($request->all(), $rules, $messages);
+        $user = User::where('email', $validParams['user_email'])->first();
+        foreach ($validParams['roles'] as $role) {
+            $user->removeRole($role);
+        }
+        return $this->sendSuccessResponse($user, 'Roles desanexadas do usuário com sucesso!');
     }
 }
