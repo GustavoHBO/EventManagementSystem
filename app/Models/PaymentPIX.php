@@ -19,19 +19,20 @@ class PaymentPIX implements PaymentInterface
         $this->payment = $payment;
     }
 
-    public function pay()
+    /**
+     * Make the payment.
+     * @return array|bool|string
+     */
+    public function pay(): array|bool|string
     {
-        $paymentData = PaggueServiceProvider::getPaymentData($this->payment);
+        $paymentData = PaggueServiceProvider::billinOrder($this->payment);
         $paymentData['qrCode'] = $this->generateQrCode($paymentData['payment']);
         return $paymentData;
     }
 
     public function generateQrCode(string $qrCodeData): string
     {
-        $renderer = new ImageRenderer(
-            new RendererStyle(300),
-            new ImagickImageBackEnd()
-        );
+        $renderer = new ImageRenderer(new RendererStyle(300), new ImagickImageBackEnd());
         $writer = new Writer($renderer);
         return base64_encode($writer->writeString($qrCodeData));
     }

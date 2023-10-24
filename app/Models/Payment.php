@@ -40,6 +40,16 @@ class Payment extends Model
     }
 
     /**
+     * Find payment by UUID.
+     * @param  string  $uuid  - Payment UUID.
+     * @return Payment - Payment data.
+     */
+    public static function findByUUID(string $uuid): Payment
+    {
+        return self::where('uuid', $uuid)->firstOrFail();
+    }
+
+    /**
      * Get the order that owns the Payment.
      * @return HasOne
      */
@@ -69,7 +79,7 @@ class Payment extends Model
     public function checkout()
     {
         // Generate UUID if not exists.
-        if(!$this->uuid){
+        if (!$this->uuid) {
             $this->uuid = Str::uuid();
         }
         $payment = $this->factoryPayment->createPayment($this);
