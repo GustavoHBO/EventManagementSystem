@@ -32,6 +32,8 @@ class BasicPermissionSeeder extends Seeder
             'team create',
             'team list',
             'team delete',
+            'team invite',
+            'team withdraw',
             // Events
             'event manage',
             'event create',
