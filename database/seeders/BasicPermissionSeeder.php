@@ -39,6 +39,11 @@ class BasicPermissionSeeder extends Seeder
             'event delete',
             'event manage banners',
             'event receive notifications',
+            // Orders
+            'order list',
+            'order create',
+            // Payments
+            'payment list',
             // Sectors
             'sector create',
             'sector list',
@@ -70,7 +75,7 @@ class BasicPermissionSeeder extends Seeder
             'role delete'
         ];
 
-        $team = Team::create(['name' => 'default', 'user_id' => 1]);
+        $team = Team::firstOrCreate(['name' => 'default', 'user_id' => 1]);
         setPermissionsTeamId($team->id);
 
         foreach ($permissions as $permission) {

@@ -16,7 +16,8 @@ class PaymentStatusSeeder extends Seeder
             ['name' => 'Pending', 'description' => 'Pagamento pendente.'],
             ['name' => 'Completed', 'description' => 'Pagamento concluído.'],
             ['name' => 'Failed', 'description' => 'Pagamento falhou.'],
-            ['name' => 'Refunded', 'description' => 'Pagamento reembolsado.']
+            ['name' => 'Refunded', 'description' => 'Pagamento reembolsado.'],
+            ['name' => 'Canceled', 'description' => 'Pagamento cancelado.'],
         ];
         foreach ($paymentStatuses as $status) {
             PaymentStatus::firstOrCreate($status);
