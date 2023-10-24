@@ -123,7 +123,7 @@ class CouponBusiness extends BaseBusiness
     public static function isCouponUsable(Coupon $coupon): bool
     {
         // Check if the coupon is usable.
-        return $coupon->max_usages === null || $coupon->max_usages > CouponUsage::where('coupon_id',
-                $coupon->id)->count();
+        return $coupon->expiration_date > now() && ($coupon->max_usages === null || $coupon->max_usages > CouponUsage::where('coupon_id',
+                $coupon->id)->count());
     }
 }

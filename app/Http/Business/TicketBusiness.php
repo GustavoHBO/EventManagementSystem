@@ -4,6 +4,8 @@ namespace App\Http\Business;
 
 use App\Models\Ticket;
 use App\Models\TicketPrice;
+use Auth;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 use Spatie\Permission\Exceptions\UnauthorizedException;
@@ -107,13 +109,19 @@ class TicketBusiness extends BaseBusiness
 
     /**
      * Get all tickets.
-     * @return array - Tickets found.
-     * @throws UnauthorizedException - If the user does not have permission to view tickets.
+     * @return Collection - Tickets found.
      */
-    public static function getAllTickets(): array
+    public static function getAllTickets(): Collection
     {
-        BaseBusiness::hasPermissionTo('ticket list');
-        return Ticket::all()->toArray();
+        $user = Auth::user();
+        if($user->hasPermissionTo('ticket list')) {
+            if ($user->hasRole(['super admin', 'producer'])) {
+                return Ticket::where('team_id', getPermissionsTeamId())->get();
+            } elseif ($user->hasRole('client')) {
+                return Ticket::where('user_id', $user->id)->get();
+            }
+        }
+        throw new UnauthorizedException(403, 'Você não tem permissão para listar tickets.');
     }
 
     /**
@@ -125,7 +133,8 @@ class TicketBusiness extends BaseBusiness
     public static function createTicketPrice($data): TicketPrice
     {
         BaseBusiness::hasPermissionTo('ticket prices create');
-        $validParams = Validator::validate($data, TicketBusiness::rulesCreateTicketPrice, TicketBusiness::messagesCreateTicketPrice);
+        $validParams = Validator::validate($data, TicketBusiness::rulesCreateTicketPrice,
+            TicketBusiness::messagesCreateTicketPrice);
         return TicketPrice::create($validParams);
     }
 }

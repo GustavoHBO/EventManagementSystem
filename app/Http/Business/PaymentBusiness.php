@@ -4,6 +4,7 @@ namespace App\Http\Business;
 
 use App\Models\Payment;
 use Auth;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Validation\ValidationException;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use Validator;
@@ -95,13 +96,12 @@ class PaymentBusiness extends BaseBusiness
 
     /**
      * Get all payments.
-     * @return array - Payments found.
-     * @throws UnauthorizedException - If the user does not have permission to view payments.
+     * @return Collection - Payments found.
      */
-    public static function getAllPayments(): array
+    public static function getAllPayments(): Collection
     {
-        BaseBusiness::hasPermissionTo('view payments');
-        return Payment::all()->toArray();
+        BaseBusiness::hasPermissionTo('payment list');
+        return Payment::where('team_id', getPermissionsTeamId())->get();
     }
 
     /**

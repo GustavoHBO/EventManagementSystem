@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API;
 use App\Http\Business\OrderBusiness;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\OrderResource;
+use App\Models\Order;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
@@ -18,17 +19,18 @@ class OrderController extends Controller
      */
     public function index(): JsonResponse
     {
-        return $this->sendSuccessResponse(OrderBusiness::getAllOrders(), 'Pedidos recuperados com sucesso!');
+        return $this->sendSuccessResponse(OrderResource::collection(OrderBusiness::getAllOrders()), 'Pedidos recuperados com sucesso!');
     }
 
     /**
      * Display the specified order.
      * @param $id  - Order ID.
      * @return JsonResponse - Order data.
+     * @throws ValidationException - If the data is invalid.
      */
     public function show($id): JsonResponse
     {
-        return $this->sendSuccessResponse(OrderBusiness::getOrderById($id), 'Pedido recuperado com sucesso!');
+        return $this->sendSuccessResponse(OrderResource::make(OrderBusiness::getOrderById($id)), 'Pedido recuperado com sucesso!');
     }
 
     /**
@@ -39,5 +41,16 @@ class OrderController extends Controller
     public function store(Request $request): JsonResponse
     {
         return $this->sendSuccessResponse(OrderResource::make(OrderBusiness::createOrder($request->all())), 'Pedido criado com sucesso!');
+    }
+
+    /**
+     * Cancel the specified order.
+     * @throws Throwable - If the transaction fails.
+     * @throws ValidationException - If the data is invalid.
+     */
+    public function destroy($id): JsonResponse
+    {
+        $order = Order::find($id);
+        return $this->sendSuccessResponse(OrderResource::make(OrderBusiness::cancelOrder($order)), 'Pedido deletado com sucesso!');
     }
 }

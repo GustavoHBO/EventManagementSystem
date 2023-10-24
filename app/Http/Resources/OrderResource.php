@@ -2,7 +2,6 @@
 
 namespace App\Http\Resources;
 
-use App\Models\Ticket;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -19,8 +18,9 @@ class OrderResource extends JsonResource
             'id' => $this->id,
             'payment_id' => $this->payment_id,
             'total_price' => $this->total_amount,
-            'tickets_amount' => Ticket::where('order_item_id', $this->id)->count(),
-            'status' => $this->status,
+            'tickets_amount' => $this->tickets()->count(),
+            'status' => $this->payment()->first()->paymentStatus()->first()->description,
+            'payment_data' => $this->paymentData,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

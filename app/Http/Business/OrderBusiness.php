@@ -7,14 +7,18 @@ use App\Models\CouponUsage;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Payment;
+use App\Models\PaymentStatus;
 use App\Models\Ticket;
 use App\Models\TicketPrice;
 use App\Models\TicketStatus;
+use App\Notifications\OrderPlacedNotification;
 use Auth;
 use DB;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Validation\ValidationException;
+use Spatie\Permission\Exceptions\UnauthorizedException;
+use Str;
 use Throwable;
 use Validator;
 
@@ -57,17 +61,18 @@ class OrderBusiness extends BaseBusiness
         $validatedData = Validator::validate($data, self::rulesCreateOrder, self::messagesCreateOrder);
 
         $coupon = null;
-        $eventId = 12;
+        $eventId = 1;
         if (isset($validatedData['coupon_code'])) {
             $coupon = Coupon::where('code', $validatedData['coupon_code'])->where('event_id', $eventId)->first();
             // Check if the coupon is usable.
-            if (!CouponBusiness::isCouponUsable($coupon)) {
+            if (!$coupon || !CouponBusiness::isCouponUsable($coupon)) {
                 throw ValidationException::withMessages(['coupon_code' => 'O cupom inválido ou expirado.']);
             }
         }
 
         $order = null;
         $qtyRetryTransaction = 2;
+
         DB::transaction(function () use ($coupon, $validatedData, &$order, &$qtyRetryTransaction) {
             $orderTotal = 0;
             $ordemItem = [];
@@ -110,12 +115,15 @@ class OrderBusiness extends BaseBusiness
             }
 
             $payment = Payment::create([
+                'uuid' => (string)Str::uuid(), // Unique identifier of the payment.
+                'team_id' => getPermissionsTeamId(),
                 'payment_method_id' => $validatedData['payment_method_id'],
                 'status_id' => Payment::PENDING, // Status of the payment (1 = Pending, 2 = Paid, 3 = Canceled).
                 'amount' => $orderTotal, // The amount of the payment.
             ]);
             $order = Order::create([
                 'user_id' => Auth::user()->id,
+                'team_id' => getPermissionsTeamId(),
                 'payment_id' => $payment->id,
                 'status' => 1, // Status of the order (1 = Pending, 2 = Paid, 3 = Canceled).
                 'total_amount' => $orderTotal, // The total amount of the order.
@@ -136,15 +144,131 @@ class OrderBusiness extends BaseBusiness
                 foreach ($tickets as $ticket) {
                     $ticket['order_item_id'] = $orderItem->id;
                     // Check if the ticket are has available.
-                    if(TicketPrice::find($ticket['ticket_price_id'])->availableTickets() === 0){
+                    if (TicketPrice::find($ticket['ticket_price_id'])->availableTickets() === 0) {
+                        $qtyRetryTransaction = 0;
                         throw ValidationException::withMessages(['ticket_price_id' => 'O ingresso não está disponível.']);
                     }
                     Ticket::create($ticket);
                 }
             }
+            $order->paymentData = $payment->checkout();
         }, $qtyRetryTransaction); // Retry the transaction 2 times if it fails.
-
+        Auth::user()->notify(new OrderPlacedNotification($order));
         // Return the order.
         return $order;
     }
+
+    /**
+     * Get all orders.
+     * @return Collection - Orders found.
+     */
+    public static function getAllOrders(): Collection
+    {
+        $user = Auth::user();
+        if ($user->hasPermissionTo('order list')) {
+            if ($user->hasRole(['super admin', 'producer'])) {
+                return Order::where('team_id', getPermissionsTeamId())->get();
+            } elseif ($user->hasRole('client')) {
+                return Order::where('team_id', getPermissionsTeamId())->where('user_id', $user->id)->get();
+            }
+        }
+        throw new UnauthorizedException(403, 'Você não tem permissão para listar pedidos.');
+    }
+
+    /**
+     * Get an order by ID.
+     * @param  int  $id  - Order ID.
+     * @return Order - Order found.
+     * @throws ValidationException - If the order does not exist.
+     */
+    public static function getOrderById(int $id): Order
+    {
+        $order = Order::find($id);
+        if ($order) {
+            if (Auth::user()->hasPermissionTo('order view')) {
+                return $order;
+            }
+            throw new UnauthorizedException(403, 'Você não tem permissão para visualizar pedidos.');
+        }
+        throw ValidationException::withMessages(['id' => 'O pedido especificado não existe.']);
+    }
+
+    /**
+     * Get all orders of the authenticated user.
+     * @return Collection - Orders found.
+     */
+    public static function getAllOrdersOfAuthenticatedUser(): Collection
+    {
+        return Order::where('user_id', Auth::user()->id)->get();
+    }
+
+    /**
+     * Get an order of the authenticated user by ID.
+     * @param  int  $id  - Order ID.
+     * @return Order - Order found.
+     * @throws ValidationException - If the order does not exist.
+     */
+    public static function getOrderOfUserById(int $id): Order
+    {
+        $order = Order::where('user_id', Auth::user()->id)->find($id);
+        if ($order) {
+            return $order;
+        }
+        throw ValidationException::withMessages(['id' => 'O pedido especificado não existe.']);
+    }
+
+    /**
+     * Cancel an order.
+     * @param  Order  $order  - Order to be canceled.
+     * @return Order - Order canceled.
+     * @throws ValidationException - If the order cannot be canceled.
+     * @throws Throwable - If the transaction fails.
+     */
+    public static function cancelOrder(Order $order): Order
+    {
+        if ($order->payment->status_id === Payment::PENDING) {
+            $order->payment->status_id = Payment::CANCELED;
+            DB::transaction(function () use ($order) {
+                $order->save();
+                $order->payment->update([
+                    'status_id' => Payment::CANCELED
+                ]);
+                foreach ($order->tickets as $ticket) {
+                    $ticket->status_id = TicketStatus::CANCELLED;
+                    $ticket->save();
+                }
+            }, 3);
+            return $order;
+        } else {
+            throw ValidationException::withMessages(['id' => 'O pedido não pode ser cancelado.']);
+        }
+    }
+
+    /**
+     * Update payment status of the order and the tickets.
+     * @param  Order  $order  - Order to be updated.
+     * @param  int  $paymentStatusId  - Payment status ID.
+     * @return Order - Order updated.
+     * @throws ValidationException - If the order cannot be updated.
+     * @throws Throwable - If the transaction fails.
+     */
+    public static function updatePaymentStatus(Order $order, int $paymentStatusId): Order
+    {
+        $paymentStatus = PaymentStatus::findOrFail($paymentStatusId);
+        if ($order->payment->status_id !== $paymentStatus->id) {
+            DB::transaction(function () use ($paymentStatusId, $order) {
+                $order->payment->update([
+                    'status_id' => $paymentStatusId
+                ]);
+                foreach ($order->tickets as $ticket) {
+                    $ticket->status_id = TicketStatus::getStatusIdByPaymentId($paymentStatusId);
+                    $ticket->save();
+                }
+            }, 3);
+            return $order;
+        } else {
+            throw ValidationException::withMessages(['id' => 'O pedido não pode ser atualizado.']);
+        }
+    }
+
 }

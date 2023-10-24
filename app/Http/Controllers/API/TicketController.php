@@ -5,8 +5,8 @@ namespace App\Http\Controllers\API;
 use App\Http\Business\TicketBusiness;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
-use Request;
 
 class TicketController extends Controller
 {
@@ -44,7 +44,7 @@ class TicketController extends Controller
 
     /**
      * Update the specified ticket.
-     * @param  Request  $request - Request data.
+     * @param  Request  $request  - Request data.
      * @param $id  - Ticket ID.
      * @return JsonResponse - Ticket data.
      */

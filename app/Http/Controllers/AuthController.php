@@ -22,6 +22,7 @@ class AuthController extends Controller
     public function signup(Request $request): JsonResponse
     {
         $user = UserBusiness::createUser($request->all());
+        $user->assignRole('client');
         $token = $user->createToken('auth_token')->plainTextToken;
         return $this->sendSuccessResponse([
             'access_token' => $token,

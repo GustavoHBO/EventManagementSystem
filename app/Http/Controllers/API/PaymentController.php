@@ -4,6 +4,8 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Business\PaymentBusiness;
 use App\Http\Controllers\Controller;
+use App\Http\Providers\PaggueServiceProvider;
+use App\Models\Payment;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
@@ -16,6 +18,9 @@ class PaymentController extends Controller
      */
     public function index(): JsonResponse
     {
+
+        dd(PaggueServiceProvider::getPaymentData(Payment::find(5)));
+        dd(PaggueServiceProvider::billinOrder(Payment::find(1))->body());
         $payments = PaymentBusiness::getAllPayments();
         return $this->sendSuccessResponse($payments, 'Payments recuperados com sucesso!');
     }
@@ -43,7 +48,7 @@ class PaymentController extends Controller
 
     /**
      * Update the specified payment.
-     * @param  Request  $request - Request data.
+     * @param  Request  $request  - Request data.
      * @param $id  - Payment ID.
      * @return JsonResponse - Payment data.
      */
