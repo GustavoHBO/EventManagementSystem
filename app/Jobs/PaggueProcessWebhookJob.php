@@ -17,7 +17,7 @@ class PaggueProcessWebhookJob extends ProcessWebhookJob
     public function handle(): void
     {
         $payload = $this->webhookCall->payload;
-        $payment = Payment::find(($payload['external_id']));
+        $payment = Payment::findByUUID(($payload['external_id']));
         if ($payload['status'] === 'paid' && (int)number_format($payment->order->total_amount * 100, 0, '',
                 '') == $payload['amount']) {
             OrderBusiness::updatePaymentStatus($payment->order, Payment::COMPLETED);

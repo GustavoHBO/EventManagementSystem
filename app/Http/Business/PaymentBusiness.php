@@ -100,8 +100,15 @@ class PaymentBusiness extends BaseBusiness
      */
     public static function getAllPayments(): Collection
     {
-        BaseBusiness::hasPermissionTo('payment list');
-        return Payment::where('team_id', getPermissionsTeamId())->get();
+        $user = Auth::user();
+        if ($user->hasPermissionTo('payment list')) {
+            if ($user->hasRole(['super admin', 'producer'])) {
+                return Payment::where('team_id', getPermissionsTeamId())->get();
+            } elseif ($user->hasRole('client')) {
+                return Payment::where('team_id', getPermissionsTeamId())->where('user_id', $user->id)->get();
+            }
+        }
+        throw new UnauthorizedException(403, 'Você não tem permissão para listar pedidos.');
     }
 
     /**
