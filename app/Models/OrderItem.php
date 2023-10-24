@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * @mixin IdeHelperOrderItem
@@ -28,12 +28,17 @@ class OrderItem extends Model
         return $this->belongsTo(Order::class, 'order_id');
     }
 
-    /**
-     * Get all tickets of the order item.
-     * @return BelongsToMany - Tickets of the order item.
-     */
-    public function tickets(): BelongsToMany
+    public function orders(): BelongsTo
     {
-        return $this->belongsToMany(Ticket::class, 'ticket_order_item', 'order_item_id', 'ticket_id');
+        return $this->belongsTo(Order::class, 'order_id');
+    }
+
+    /**
+     * Get the tickets for the OrderItem.
+     * @return HasMany - Tickets for the OrderItem.
+     */
+    public function tickets(): HasMany
+    {
+        return $this->hasMany(Ticket::class);
     }
 }

@@ -21,18 +21,6 @@ class Ticket extends Model
     ];
 
     /**
-     * Create a new ticket.
-     * @throws \Exception
-     */
-    public static function create($attributes = [])
-    {
-        if(TicketPrice::find($attributes['ticket_price_id'])->availableTickets() <= 0){
-            throw new \Exception('Não há ingressos disponíveis para este setor.');
-        }
-        return parent::create($attributes);
-    }
-
-    /**
      * Get the user that owns the Ticket.
      * @return BelongsTo
      */
@@ -68,5 +56,15 @@ class Ticket extends Model
     {
         return $this->status_id === TicketStatus::AVAILABLE && $this->ticketPrice->lot->event->datetime > now() && $this->ticketPrice->sector->capacity > $this->ticketPrice->sector->tickets->where('status_id',
                 TicketStatus::SOLD_OUT)->count();
+    }
+
+    public function order()
+    {
+        return $this->belongsTo(Order::class, 'order_id');
+    }
+
+    public function orderItem()
+    {
+        return $this->belongsTo(OrderItem::class, 'order_item_id');
     }
 }

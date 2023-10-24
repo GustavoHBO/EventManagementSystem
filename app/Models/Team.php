@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Spatie\Permission\Models\Role;
 
 /**
@@ -43,7 +45,7 @@ class Team extends Model
 //            dd(Role::where('team_id', $model->id)->get()->toArray());
 //            dd(Auth::user()->roles);
             $role = Role::where('name', 'super admin')->first();
-            if($role){
+            if ($role) {
                 $user = Auth::user() ?? User::find(1);
                 $user->assignRole('super admin');
             }
@@ -73,11 +75,70 @@ class Team extends Model
     }
 
     /**
-     * Retorna os membros do time.
-     * @return BelongsToMany
+     * Return all users of the team.
+     * @return HasMany - Users of the team.
      */
-    public function members(): BelongsToMany
+    public function members(): HasMany
     {
-        return $this->belongsToMany(User::class, 'team_user', 'team_id', 'user_id');
+        return $this->hasMany(User::class);
+    }
+
+    /**
+     * Return all events of the team.
+     * @return HasMany - Events of the team.
+     */
+    public function events(): HasMany
+    {
+        return $this->hasMany(Event::class);
+    }
+
+    /**
+     * Return all coupons of the team.
+     * @return HasMany - Coupons of the team.
+     */
+    public function coupons(): HasMany
+    {
+        return $this->hasMany(Coupon::class);
+    }
+
+    /**
+     * Define a relationship to retrieve lots through events associated with the team.
+     * @return HasManyThrough - Lots associated with the team.
+     */
+    public function lots(): HasManyThrough
+    {
+        return $this->hasManyThrough(Lot::class, Event::class);
+    }
+
+    /**
+     * Define a many-to-many relationship to retrieve sectors associated with the lot.
+     * @return BelongsToMany - Sectors associated with the lot.
+     */
+    public function sectors(): BelongsToMany
+    {
+        return $this->belongsToMany(Sector::class, 'lot_sector', 'lot_id', 'sector_id');
+    }
+
+    /**
+     * Define a one-to-many relationship to retrieve ticket prices associated with the lot.
+     * @return HasMany - Ticket prices associated with the lot.
+     */
+    public function ticketPrices(): HasMany
+    {
+        return $this->hasMany(TicketPrice::class, 'lot_id');
+    }
+
+    public function orders(): HasManyThrough
+    {
+        return $this->hasManyThrough(Order::class, Event::class)->with('orderItems.ticket.ticketPrice');
+    }
+
+    /**
+     * Get the orders for the team.
+     * @return array|mixed[] - Orders for the team.
+     */
+    public function getOrders(): array
+    {
+        return $this->with('events.lots.ticketPrices.tickets.orderItem.order')->get()->pluck('events')->all();
     }
 }

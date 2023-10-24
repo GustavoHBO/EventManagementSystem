@@ -12,6 +12,7 @@ class PaymentMethod extends Model
 {
     use HasFactory;
 
+    const PIX = 1; // Pix payment method.
     protected $fillable = [
         'name',
         'description',

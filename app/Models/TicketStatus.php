@@ -17,5 +17,15 @@ class TicketStatus extends Model
     const SOLD_OUT = 2; // Ticket is sold out.
     const RESERVED = 3; // Ticket is reserved for a user.
     const PENDING_APPROVAL = 4; // Ticket is pending approval.
-    const CANCELLED = 5; // Ticket is cancelled.
+    const CANCELED = 5; // Ticket is cancelled.
+
+    public static function getStatusIdByPaymentId($paymentId): int
+    {
+        $status = [
+            Payment::PENDING => TicketStatus::PENDING_APPROVAL,
+            Payment::COMPLETED => TicketStatus::SOLD_OUT,
+            Payment::CANCELED => TicketStatus::CANCELED,
+        ];
+        return $status[$paymentId];
+    }
 }

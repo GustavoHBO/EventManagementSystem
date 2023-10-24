@@ -37,7 +37,7 @@ class Event extends Model
      * Get the lots for the Event.
      * @return HasMany - Lots data.
      */
-    public function lots()
+    public function lots(): HasMany
     {
         return $this->hasMany(Lot::class)->orderBy('expiration_date');
     }
@@ -88,5 +88,14 @@ class Event extends Model
     public function tickets(): HasMany
     {
         return $this->hasMany(Ticket::class);
+    }
+
+    /**
+     * Get the orders for the Event.
+     * @return HasMany - Orders data.
+     */
+    public function orders(): HasMany
+    {
+        return $this->hasMany(Order::class);
     }
 }
