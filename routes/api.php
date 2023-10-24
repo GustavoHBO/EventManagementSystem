@@ -3,7 +3,9 @@
 use App\Http\Controllers\API\EventController;
 use App\Http\Controllers\API\LotController;
 use App\Http\Controllers\API\OrderController;
+use App\Http\Controllers\API\PaymentController;
 use App\Http\Controllers\API\SectorController;
+use App\Http\Controllers\API\TeamController;
 use App\Http\Controllers\API\TicketController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserController;
@@ -24,6 +26,8 @@ use Illuminate\Support\Facades\Route;
 Route::post('login', [AuthController::class, 'login']);
 Route::post('register', [AuthController::class, 'signup']);
 
+Route::webhooks('webhook-receiving-url');
+
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
@@ -38,6 +42,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::apiResource('lots', LotController::class);
         Route::apiResource('tickets', TicketController::class);
         Route::apiResource('orders', OrderController::class);
+        Route::apiResource('payments', PaymentController::class);
+        Route::post('teams/invite', [TeamController::class, 'inviteUser']);
+        Route::delete('teams/withdraw', [TeamController::class, 'withdrawUser']);
+        Route::apiResource('teams', TeamController::class);
     });
 
     // Roles
