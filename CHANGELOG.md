@@ -50,6 +50,7 @@
 
 ### Miscellaneous
 
+- 📚 Atualizando CHANGELOG - Versão: v1.0.1 [[f0c0f7f](https://github.com/GustavoHBO/EventManagementSystem/commit/f0c0f7fa0228530dc7a4cf9ea8cd425d839eb28b)]
 -  Merge branch &#x27;feature/gu/updates&#x27; into develop [[0c0d25d](https://github.com/GustavoHBO/EventManagementSystem/commit/0c0d25d11920801bc1f2db8242db43f87ad4b922)]
 - 📝 Atualizando README. [[5d4e418](https://github.com/GustavoHBO/EventManagementSystem/commit/5d4e418e434f1aaaf50ac96273502d006dbbda9c)]
 -  Merge branch &#x27;feature/gu/ConfigProj&#x27; into develop [[d2b1782](https://github.com/GustavoHBO/EventManagementSystem/commit/d2b17826683876c92db5bf0d53bc435df9cf2d25)]
