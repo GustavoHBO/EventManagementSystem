@@ -55,47 +55,11 @@ class Event extends Model
     }
 
     /**
-     * Get the team that owns the Event.
-     * @return BelongsTo - Team data.
+     * Get the coupons for the Event.
+     * @return HasMany - Coupons data.
      */
-    public function team(): BelongsTo
+    public function coupons(): HasMany
     {
-        return $this->belongsTo(Team::class);
-    }
-
-    /**
-     * Get the ticket prices for the Event.
-     * @return HasMany - TicketPrices data.
-     */
-    public function ticketPrices(): HasMany
-    {
-        return $this->hasMany(TicketPrice::class);
-    }
-
-    /**
-     * Get the sectors for the Event.
-     * @return HasMany - Sectors data.
-     */
-    public function sectors(): HasMany
-    {
-        return $this->tickets()->sectors();
-    }
-
-    /**
-     * Get the tickets for the Event.
-     * @return HasMany - Tickets data.
-     */
-    public function tickets(): HasMany
-    {
-        return $this->hasMany(Ticket::class);
-    }
-
-    /**
-     * Get the orders for the Event.
-     * @return HasMany - Orders data.
-     */
-    public function orders(): HasMany
-    {
-        return $this->hasMany(Order::class);
+        return $this->hasMany(Coupon::class);
     }
 }

@@ -58,12 +58,11 @@ class Ticket extends Model
                 TicketStatus::SOLD_OUT)->count();
     }
 
-    public function order()
-    {
-        return $this->belongsTo(Order::class, 'order_id');
-    }
-
-    public function orderItem()
+    /**
+     * Get the orderItem that owns the Ticket.
+     * @return BelongsTo - The orderItem that owns the Ticket.
+     */
+    public function orderItem(): BelongsTo
     {
         return $this->belongsTo(OrderItem::class, 'order_item_id');
     }

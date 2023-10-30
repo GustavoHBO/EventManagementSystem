@@ -28,11 +28,6 @@ class OrderItem extends Model
         return $this->belongsTo(Order::class, 'order_id');
     }
 
-    public function orders(): BelongsTo
-    {
-        return $this->belongsTo(Order::class, 'order_id');
-    }
-
     /**
      * Get the tickets for the OrderItem.
      * @return HasMany - Tickets for the OrderItem.
