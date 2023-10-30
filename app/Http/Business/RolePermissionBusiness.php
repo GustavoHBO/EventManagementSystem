@@ -13,8 +13,15 @@ use Validator;
 class RolePermissionBusiness extends BaseBusiness
 {
     const createRoleRules = [
-        'name' => 'required|unique:roles,name,team_id,NULL,id',
+        'name' => 'required|unique:roles,name,team_id',
         'team_id' => 'required|exists:teams,id'
+    ];
+
+    const createRoleMessages = [
+        'name.required' => 'The name field is required.',
+        'name.unique' => 'The name field must be unique.',
+        'team_id.required' => 'The team_id field is required.',
+        'team_id.exists' => 'The team_id field must exist in the teams table.'
     ];
 
     const createPermissionRules = [
@@ -29,9 +36,10 @@ class RolePermissionBusiness extends BaseBusiness
      */
     public static function createRole($data): Builder|Model
     {
-        BaseBusiness::hasPermissionTo('create roles');
+        BaseBusiness::hasPermissionTo('role create');
         $data['team_id'] = getPermissionsTeamId();
-        $validParams = Validator::validate($data, RolePermissionBusiness::createRoleRules);
+        $validParams = Validator::validate($data, RolePermissionBusiness::createRoleRules,
+            RolePermissionBusiness::createRoleMessages);
         return Role::create($validParams);
     }
 
@@ -46,20 +54,6 @@ class RolePermissionBusiness extends BaseBusiness
         $data['team_id'] = getPermissionsTeamId();
         $validParams = Validator::validate($data, RolePermissionBusiness::createPermissionRules);
         return Permission::create($validParams);
-    }
-
-    /**
-     * Copy the permissions from one role to another.
-     * @param $role  - The role to copy the permissions from.
-     * @param $newRole  - The role to copy the permissions to.
-     * @return void
-     */
-    public static function copyRolePermissions($role, $newRole): void
-    {
-        $permissions = $role->permissions;
-        foreach ($permissions as $permission) {
-            $newRole->givePermissionTo($permission);
-        }
     }
 
     /**
@@ -78,6 +72,20 @@ class RolePermissionBusiness extends BaseBusiness
     }
 
     /**
+     * Copy the permissions from one role to another.
+     * @param $role  - The role to copy the permissions from.
+     * @param $newRole  - The role to copy the permissions to.
+     * @return void
+     */
+    public static function copyRolePermissions($role, $newRole): void
+    {
+        $permissions = $role->permissions;
+        foreach ($permissions as $permission) {
+            $newRole->givePermissionTo($permission);
+        }
+    }
+
+    /**
      * Copy the default roles and permissions to a new team.
      * @param $newTeam  - The team to copy the roles and permissions to.
      * @return void
@@ -87,7 +95,11 @@ class RolePermissionBusiness extends BaseBusiness
         $defaultRoles = Role::where('team_id', 1)->get();
         foreach ($defaultRoles as $role) {
             setPermissionsTeamId($newTeam->id);
-            $newRole = Role::create(['name' => $role->name, 'team_id' => $newTeam->id, 'guard_name' => $role->guard_name]);
+            $newRole = Role::create([
+                'name' => $role->name,
+                'team_id' => $newTeam->id,
+                'guard_name' => $role->guard_name
+            ]);
 //            $newRoleId = \DB::table('roles')->insertGetId([
 //                'name' => $role->name,
 //                'team_id' => $newTeam->id,

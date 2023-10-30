@@ -12,28 +12,6 @@ use Spatie\Permission\Exceptions\UnauthorizedException;
 
 class TicketBusiness extends BaseBusiness
 {
-    // Rules to create a ticket.
-    const rulesCreateTicket = [
-        'user_id' => 'required|integer|exists:users,id',
-        'status_id' => 'required|integer|exists:ticket_statuses,id',
-        'ticket_price_id' => 'required|integer|exists:ticket_prices,id',
-    ];
-
-    // Messages to be returned when validation fails on create ticket.
-    const messagesCreateTicket = [
-        'user_id.required' => 'The user ID is required.',
-        'user_id.integer' => 'The user ID must be an integer.',
-        'user_id.exists' => 'The selected user does not exist in the database.',
-
-        'status_id.required' => 'The status ID is required.',
-        'status_id.integer' => 'The status ID must be an integer.',
-        'status_id.exists' => 'The selected status does not exist in the database.',
-
-        'ticket_price_id.required' => 'The ticket price ID is required.',
-        'ticket_price_id.integer' => 'The ticket price ID must be an integer.',
-        'ticket_price_id.exists' => 'The selected ticket price does not exist in the database.',
-    ];
-
     // Rules to create a ticket price.
     const rulesCreateTicketPrice = [
         'sector_id' => 'required|integer|exists:sectors,id',
@@ -55,18 +33,6 @@ class TicketBusiness extends BaseBusiness
         'price.numeric' => 'The price must be a number.',
         'price.min' => 'The price must be at least 0.',
     ];
-
-    /**
-     * Create a new Ticket instance and return it.
-     * @throws ValidationException - If the data is invalid.
-     */
-    public static function createTicket($data): Ticket
-    {
-        BaseBusiness::hasPermissionTo('ticket create');
-        $validParams = Validator::validate($data, TicketBusiness::rulesCreateTicket,
-            TicketBusiness::messagesCreateTicket);
-        return Ticket::create($validParams);
-    }
 
     /**
      * Update a ticket and return it.
@@ -116,7 +82,7 @@ class TicketBusiness extends BaseBusiness
         $user = Auth::user();
         if($user->hasPermissionTo('ticket list')) {
             if ($user->hasRole(['super admin', 'producer'])) {
-                return Ticket::where('team_id', getPermissionsTeamId())->get();
+                return Ticket::get();
             } elseif ($user->hasRole('client')) {
                 return Ticket::where('user_id', $user->id)->get();
             }

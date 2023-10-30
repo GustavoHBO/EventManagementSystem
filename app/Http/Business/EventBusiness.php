@@ -4,6 +4,7 @@ namespace App\Http\Business;
 
 use App\Exceptions\CreateEventException;
 use App\Models\Event;
+use Auth;
 use DB;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
@@ -84,6 +85,8 @@ class EventBusiness
     public static function createEvent($data): Model|Event
     {
         // Get the validated data
+        $data['user_id'] = Auth::user()->id;
+        $data['team_id'] = getPermissionsTeamId();
         $validParams = Validator::validate($data, EventBusiness::rules, EventBusiness::customMessages);
         $event = null;
         DB::transaction(function () use ($validParams, &$event) {
@@ -91,7 +94,7 @@ class EventBusiness
             // Make the upload of the banner.
             if (isset($validParams['banner'])) {
                 // Generate a UUID for the banner.
-                $uuid = Str::uuid();
+                $uuid = Str::uuid()->toString();
                 if (Storage::put("/$bannerPath/$uuid", $validParams['banner'])) {
                     $validParams['banner'] = $uuid;
                     $event = Event::create($validParams);

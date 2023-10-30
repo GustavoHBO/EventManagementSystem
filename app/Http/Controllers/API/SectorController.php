@@ -9,6 +9,7 @@ use Auth;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
+use Symfony\Component\HttpFoundation\Response;
 
 class SectorController extends Controller
 {
@@ -27,6 +28,21 @@ class SectorController extends Controller
     }
 
     /**
+* Get a sector by id.
+     * @param  Sector  $sector
+     * @return JsonResponse
+     */
+    public function show(Sector $sector): JsonResponse
+    {
+        if (!Auth::user()->hasPermissionTo('sector list')) {
+            return $this->sendErrorResponse('Você não tem permissão para visualizar os setores!', 403);
+        }
+        // Get the sector using the SectorBusiness class
+        $sector = SectorBusiness::getMySectors()->where('id', $sector->id)->first();
+        return $this->sendSuccessResponse($sector, 'Setor recuperado com sucesso!');
+    }
+
+    /**
      * Create a new sector and return it.
      * @param  Request  $request
      * @return JsonResponse
@@ -39,7 +55,7 @@ class SectorController extends Controller
 
         try {
             $sector = SectorBusiness::createSector($request->all());
-            return $this->sendSuccessResponse($sector, 'Setor criado com sucesso!');
+            return $this->sendSuccessResponse($sector, 'Setor criado com sucesso!', Response::HTTP_CREATED);
         } catch (ValidationException $e) {
             return $this->sendErrorResponse($e->getMessage(), 400);
         }
@@ -76,8 +92,6 @@ class SectorController extends Controller
         if (!Auth::user()->hasPermissionTo('sector delete')) {
             return $this->sendErrorResponse('Você não tem permissão para deletar setores!', 403);
         }
-        // Delete the sector using the SectorBusiness class
-        $sector->delete();
-        return $this->sendSuccessResponse(null, 'Setor deletado com sucesso!');
+        return $this->sendErrorResponse('Não é possível deletar setores!', 405);
     }
 }

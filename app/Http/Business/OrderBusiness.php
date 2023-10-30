@@ -61,13 +61,17 @@ class OrderBusiness extends BaseBusiness
         $validatedData = Validator::validate($data, self::rulesCreateOrder, self::messagesCreateOrder);
 
         $coupon = null;
-        $eventId = 1;
         if (isset($validatedData['coupon_code'])) {
-            $coupon = Coupon::where('code', $validatedData['coupon_code'])->where('event_id', $eventId)->first();
-            // Check if the coupon is usable.
-            if (!$coupon || !CouponBusiness::isCouponUsable($coupon)) {
-                throw ValidationException::withMessages(['coupon_code' => 'O cupom inválido ou expirado.']);
+            foreach ($validatedData['order_items'] as $orderItem) {
+                $ticketPrice = TicketPrice::find($orderItem['ticket_price_id']);
+                $eventId = $ticketPrice->lot->event_id;
+                $coupon = Coupon::where('code', $validatedData['coupon_code'])->where('event_id', $eventId)->first();
+                // Check if the coupon is usable.
+                if (!$coupon || !CouponBusiness::isCouponUsable($coupon)) {
+                    throw ValidationException::withMessages(['coupon_code' => 'O cupom inválido ou expirado.']);
+                }
             }
+
         }
 
         $order = null;
@@ -185,7 +189,7 @@ class OrderBusiness extends BaseBusiness
     {
         $order = Order::find($id);
         if ($order) {
-            if (Auth::user()->hasPermissionTo('order view')) {
+            if (Auth::user()->hasPermissionTo('order list')) {
                 return $order;
             }
             throw new UnauthorizedException(403, 'Você não tem permissão para visualizar pedidos.');
@@ -234,7 +238,7 @@ class OrderBusiness extends BaseBusiness
                     'status_id' => Payment::CANCELED
                 ]);
                 foreach ($order->tickets as $ticket) {
-                    $ticket->status_id = TicketStatus::CANCELLED;
+                    $ticket->status_id = TicketStatus::CANCELED;
                     $ticket->save();
                 }
             }, 3);

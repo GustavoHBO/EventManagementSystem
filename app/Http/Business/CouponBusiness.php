@@ -4,6 +4,10 @@ namespace App\Http\Business;
 
 use App\Models\Coupon;
 use App\Models\CouponUsage;
+use App\Models\Team;
+use Auth;
+use Exception;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 use Spatie\Permission\Exceptions\UnauthorizedException;
@@ -55,7 +59,8 @@ class CouponBusiness extends BaseBusiness
      */
     public static function createCoupon(array $data): Coupon
     {
-        BaseBusiness::hasPermissionTo('create coupons');
+        BaseBusiness::hasPermissionTo('coupon create');
+        $data['user_id'] = Auth::user()->id;
         // Verify if the data is valid
         $validatedParams = Validator::validate($data, CouponBusiness::rules, CouponBusiness::messages);
 
@@ -69,12 +74,23 @@ class CouponBusiness extends BaseBusiness
      * @param  array  $data  - Coupon data.
      * @return Coupon - Coupon updated.
      * @throws UnauthorizedException - If the user does not have permission to update coupons.
+     * @throws Exception - If the coupon is not found.
      */
     public static function updateCoupon(int $id, array $data): Coupon
     {
-        BaseBusiness::hasPermissionTo('update coupons');
-        $coupon = Coupon::find($id);
-        $coupon->update($data);
+        BaseBusiness::hasPermissionTo('coupon edit');
+        $coupon = self::getCouponById($id);
+
+        $rules = [
+            'expiration_date' => 'date|nullable'
+        ];
+        $messages = [
+            'expiration_date.date' => 'O campo data de validade deve ser uma data válida.',
+        ];
+
+        // Verify if the data is valid
+        $validatedParams = Validator::validate($data, $rules, $messages);
+        $coupon->update($validatedParams);
         return $coupon;
     }
 
@@ -83,11 +99,15 @@ class CouponBusiness extends BaseBusiness
      * @param  int  $id  - Coupon ID.
      * @return Coupon - Coupon deleted.
      * @throws UnauthorizedException - If the user does not have permission to delete coupons.
+     * @throws Exception - If the coupon is not found.
      */
     public static function deleteCoupon(int $id): Coupon
     {
-        BaseBusiness::hasPermissionTo('delete coupons');
-        $coupon = Coupon::find($id);
+        BaseBusiness::hasPermissionTo('delete coupon');
+        $coupon = self::getCouponById($id);
+        if ($coupon) {
+            throw new Exception('Coupon not found.');
+        }
         $coupon->delete();
         return $coupon;
     }
@@ -95,24 +115,30 @@ class CouponBusiness extends BaseBusiness
     /**
      * Get a coupon by ID.
      * @param  int  $id  - Coupon ID.
-     * @return Coupon - Coupon found.
-     * @throws UnauthorizedException - If the user does not have permission to view coupons.
+     * @return Coupon|null - Coupon found.
+     * @throws UnauthorizedException - If the user does not have permission to coupon list.
      */
-    public static function getCouponById(int $id): Coupon
+    public static function getCouponById(int $id): ?Coupon
     {
-        BaseBusiness::hasPermissionTo('view coupons');
-        return Coupon::find($id);
+        BaseBusiness::hasPermissionTo('coupon list');
+        return Coupon::find($id)?->get()->filter(function ($coupon) {
+            return $coupon->event->team_id === getPermissionsTeamId();
+        })->first();
     }
 
     /**
      * Get all coupons.
-     * @return array - Coupons found.
-     * @throws UnauthorizedException - If the user does not have permission to view coupons.
+     * @return Collection - Coupons found.
      */
-    public static function getAllCoupons(): array
+    public static function getAllCoupons(): Collection
     {
-        BaseBusiness::hasPermissionTo('view coupons');
-        return Coupon::all()->toArray();
+        BaseBusiness::hasPermissionTo('coupon list');
+        return Team::find(getPermissionsTeamId())->with('events.coupons')->first()->events->pluck('coupons')->reduce(function (
+            Collection $carry,
+            $item
+        ) {
+            return $carry->merge($item);
+        }, new Collection());
     }
 
     /**
@@ -124,6 +150,6 @@ class CouponBusiness extends BaseBusiness
     {
         // Check if the coupon is usable.
         return $coupon->expiration_date > now() && ($coupon->max_usages === null || $coupon->max_usages > CouponUsage::where('coupon_id',
-                $coupon->id)->count());
+                    $coupon->id)->count());
     }
 }

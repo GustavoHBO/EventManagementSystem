@@ -19,7 +19,8 @@ class OrderController extends Controller
      */
     public function index(): JsonResponse
     {
-        return $this->sendSuccessResponse(OrderResource::collection(OrderBusiness::getAllOrders()), 'Pedidos recuperados com sucesso!');
+        return $this->sendSuccessResponse(OrderResource::collection(OrderBusiness::getAllOrders()),
+            'Pedidos recuperados com sucesso!');
     }
 
     /**
@@ -30,7 +31,8 @@ class OrderController extends Controller
      */
     public function show($id): JsonResponse
     {
-        return $this->sendSuccessResponse(OrderResource::make(OrderBusiness::getOrderById($id)), 'Pedido recuperado com sucesso!');
+        return $this->sendSuccessResponse(OrderResource::make(OrderBusiness::getOrderById($id)),
+            'Pedido recuperado com sucesso!');
     }
 
     /**
@@ -40,7 +42,8 @@ class OrderController extends Controller
      */
     public function store(Request $request): JsonResponse
     {
-        return $this->sendSuccessResponse(OrderResource::make(OrderBusiness::createOrder($request->all())), 'Pedido criado com sucesso!');
+        return $this->sendSuccessResponse(OrderResource::make(OrderBusiness::createOrder($request->all())),
+            'Pedido criado com sucesso!', 201);
     }
 
     /**
@@ -50,7 +53,8 @@ class OrderController extends Controller
      */
     public function destroy($id): JsonResponse
     {
-        $order = Order::find($id);
-        return $this->sendSuccessResponse(OrderResource::make(OrderBusiness::cancelOrder($order)), 'Pedido deletado com sucesso!');
+        $order = Order::where('team_id', getPermissionsTeamId())->findOrFail($id);
+        return $this->sendSuccessResponse(OrderResource::make(OrderBusiness::cancelOrder($order)),
+            'Pedido deletado com sucesso!');
     }
 }

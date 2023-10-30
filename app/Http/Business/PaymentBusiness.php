@@ -5,9 +5,7 @@ namespace App\Http\Business;
 use App\Models\Payment;
 use Auth;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Validation\ValidationException;
 use Spatie\Permission\Exceptions\UnauthorizedException;
-use Validator;
 
 class PaymentBusiness extends BaseBusiness
 {
@@ -41,48 +39,6 @@ class PaymentBusiness extends BaseBusiness
     ];
 
     /**
-     * Create a new Payment instance and return it.
-     * @throws ValidationException - If the data is invalid.
-     * @throws UnauthorizedException - If the user does not have permission to create a payment.
-     * @throws ValidationException - If the data is invalid.
-     */
-    public static function createPayment($data): Payment
-    {
-        BaseBusiness::hasPermissionTo('create payments');
-        $validParams = Validator::validate($data, PaymentBusiness::rules, PaymentBusiness::messages);
-        return Payment::create($validParams);
-    }
-
-    /**
-     * Update a payment and return it.
-     * @param $id  - Payment ID.
-     * @param $data  - Payment data.
-     * @return Payment - Payment updated.
-     * @throws UnauthorizedException - If the user does not have permission to update a payment.
-     */
-    public static function updatePayment($id, $data): Payment
-    {
-        BaseBusiness::hasPermissionTo('update payments');
-        $payment = Payment::find($id);
-        $payment->update($data);
-        return $payment;
-    }
-
-    /**
-     * Delete a payment and return it.
-     * @param  int  $id  - Payment ID.
-     * @return Payment - Payment deleted.
-     * @throws UnauthorizedException - If the user does not have permission to delete a payment.
-     */
-    public static function deletePayment(int $id): Payment
-    {
-        BaseBusiness::hasPermissionTo('delete payments');
-        $payment = Payment::find($id);
-        $payment->delete();
-        return $payment;
-    }
-
-    /**
      * Get a payment by ID.
      * @param $id  - Payment ID.
      * @return Payment - Payment found.
@@ -90,8 +46,16 @@ class PaymentBusiness extends BaseBusiness
      */
     public static function getPaymentById($id): Payment
     {
-        BaseBusiness::hasPermissionTo('view payments');
-        return Payment::find($id);
+        $user = Auth::user();
+        if ($user->hasPermissionTo('payment list')) {
+            if ($user->hasRole(['super admin', 'producer'])) {
+                return Payment::where('team_id', getPermissionsTeamId())->where('id', $id)->first();
+            } elseif ($user->hasRole('client')) {
+                return Payment::where('team_id', getPermissionsTeamId())->where('user_id', $user->id)->where('id',
+                    $id)->first();
+            }
+        }
+        throw new UnauthorizedException(403, 'Você não tem permissão para listar pedidos.');
     }
 
     /**
@@ -109,14 +73,5 @@ class PaymentBusiness extends BaseBusiness
             }
         }
         throw new UnauthorizedException(403, 'Você não tem permissão para listar pedidos.');
-    }
-
-    /**
-     * Get all my payments.
-     * @return array - Payments found.
-     */
-    public static function getAllMyPayments(): array
-    {
-        return Payment::where('user_id', Auth::user()->id)->get()->toArray();
     }
 }

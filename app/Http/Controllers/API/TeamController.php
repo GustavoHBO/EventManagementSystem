@@ -28,7 +28,7 @@ class TeamController extends Controller
      */
     public function store(Request $request): JsonResponse
     {
-        return response()->json(TeamBusiness::createTeam($request->all()), 201);
+        return $this->sendSuccessResponse(TeamBusiness::createTeam($request->all()), 'Time criado com sucesso!', 201);
     }
 
     /**

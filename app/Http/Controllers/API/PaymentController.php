@@ -37,8 +37,7 @@ class PaymentController extends Controller
      */
     public function store(Request $request): JsonResponse
     {
-        $payment = PaymentBusiness::createPayment($request->all());
-        return $this->sendSuccessResponse($payment, 'Payment criado com sucesso!');
+        return $this->sendErrorResponse('Não é possível criar um pagamento.', 405);
     }
 
     /**
@@ -49,8 +48,7 @@ class PaymentController extends Controller
      */
     public function update(Request $request, $id): JsonResponse
     {
-        $payment = PaymentBusiness::updatePayment($id, $request->all());
-        return $this->sendSuccessResponse($payment, 'Payment atualizado com sucesso!');
+        return $this->sendErrorResponse('Não é possível atualizar um pagamento.', 405);
     }
 
     /**
@@ -60,7 +58,6 @@ class PaymentController extends Controller
      */
     public function destroy($id): JsonResponse
     {
-        $payment = PaymentBusiness::deletePayment($id);
-        return $this->sendSuccessResponse($payment, 'Payment deletado com sucesso!');
+        return $this->sendErrorResponse('Não é possível deletar um pagamento.', 405);
     }
 }

@@ -67,11 +67,15 @@ class LotBusiness
      * Delete a lot and return it.
      * @param  int  $id  - Lot ID.
      * @return Lot - Lot deleted.
+     * @throws ValidationException - If the lot has tickets associated with it.
      */
     public static function deleteLot(int $id): Lot
     {
         BaseBusiness::hasPermissionTo('lot delete');
         $lot = Lot::find($id);
+        if($lot->tickets->count()){
+            throw ValidationException::withMessages(['lot' => 'Este lote possui ingressos associados.']);
+        }
         $lot->delete();
         return $lot;
     }

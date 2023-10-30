@@ -75,11 +75,8 @@ class EventController extends Controller
             return $this->sendErrorResponse('Você não tem permissão para criar eventos!', 403);
         }
         try {
-            $data = $request->all();
-            $data['user_id'] = $request->user()->id;
-            $data['team_id'] = getPermissionsTeamId();
             // Create a new event.
-            $event = EventBusiness::createEvent($data);
+            $event = EventBusiness::createEvent($request->all());
             // Return the event as a JSON response.
             return $this->sendSuccessResponse(new EventResource($event), 'Evento criado com sucesso!', 201);
         } catch (Throwable|CreateEventException $e) {
@@ -120,7 +117,7 @@ class EventController extends Controller
     public function destroy($id): JsonResponse
     {
         $user = Auth::user();
-        if (!$user->hasPermissionTo('delete events')) {
+        if (!$user->hasPermissionTo('event delete')) {
             return $this->sendErrorResponse('Você não tem permissão para excluir eventos!', 403);
         }
         // Get the event by ID.

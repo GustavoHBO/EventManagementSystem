@@ -5,9 +5,11 @@ namespace App\Http\Controllers;
 use App\Http\Business\UserBusiness;
 use App\Http\Resources\UserResource;
 use App\Models\User;
+use Auth;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 class UserController extends Controller
 {
@@ -28,7 +30,7 @@ class UserController extends Controller
      */
     public function index(): JsonResponse
     {
-        $users = User::all();
+        $users = User::where('id', Auth::user()->id)->get();
         return $this->sendSuccessResponse(UserResource::collection($users));
     }
 
@@ -42,7 +44,7 @@ class UserController extends Controller
             // Create a new user
             $user = $this->userBusiness->createUser($request->all());
 
-            return $this->sendSuccessResponse(new UserResource($user), 'User created successfully');
+            return $this->sendSuccessResponse(new UserResource($user), 'User created successfully', 201);
         } catch (Exception $e) {
             return $this->sendErrorResponse($e->getMessage());
         }
@@ -55,7 +57,10 @@ class UserController extends Controller
      */
     public function show($id): JsonResponse
     {
-        $user = User::findOrFail($id);
+        if (Auth::user()->id != $id) {
+            return $this->sendErrorResponse('User not found');
+        }
+        $user = Auth::user();
         return $this->sendSuccessResponse(new UserResource($user));
     }
 
@@ -70,9 +75,15 @@ class UserController extends Controller
         try {
             $validatedData = $request->validate([
                 'name' => 'required|string|max:255',
-                'email' => 'required|email|unique:users,email,'.$id,
+            ],
+            [
+                'name.required' => 'Nome é obrigatório',
+                'name.string' => 'Nome deve ser uma string',
+                'name.max' => 'Nome deve ter no máximo 255 caracteres',
             ]);
-
+            if(Auth::user()->id != $id) {
+                return $this->sendErrorResponse('User not found');
+            }
             $user = User::findOrFail($id);
             $this->userBusiness->updateUser($user, $validatedData);
 
@@ -89,13 +100,6 @@ class UserController extends Controller
      */
     public function destroy($id): JsonResponse
     {
-        try {
-            $user = User::findOrFail($id);
-            $this->userBusiness->deleteUser($user);
-
-            return $this->sendSuccessResponse([], 'User deleted successfully');
-        } catch (Exception $e) {
-            return $this->sendErrorResponse($e->getMessage());
-        }
+        return $this->sendErrorResponse('O usuário não pode ser excluído!', Response::HTTP_NOT_IMPLEMENTED);
     }
 }

@@ -57,15 +57,4 @@ class UserBusiness
         $user->update($data);
         return $user;
     }
-
-    /**
-     * Exclui um usuário.
-     * @param  User  $user  - Usuário a ser excluído.
-     * @return void
-     */
-    public function deleteUser(User $user): void
-    {
-        // Lógica para excluir um usuário
-        $user->delete();
-    }
 }

@@ -31,7 +31,6 @@ class TeamBusiness extends BaseBusiness
      */
     public static function createTeam($data): Team
     {
-        BaseBusiness::hasPermissionTo('team create');
         $rules = [
             'name' => 'required|string|max:255'
         ];
@@ -113,6 +112,13 @@ class TeamBusiness extends BaseBusiness
             'user_id.exists' => 'The user id field must be a valid user id.'
         ];
         $validParams = Validator::validate($data, $rules, $messages);
+
+        if(Auth::user()->id == $validParams['user_id']){
+            throw ValidationException::withMessages([
+                'user_id' => 'Você não pode remover a si mesmo.'
+            ]);
+        }
+
         $user = User::findOrFail($validParams['user_id']);
         $roles = $user->roles->pluck('id')->toArray();
         foreach ($roles as $role) {

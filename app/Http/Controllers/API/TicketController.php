@@ -6,7 +6,6 @@ use App\Http\Business\TicketBusiness;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Validation\ValidationException;
 
 class TicketController extends Controller
 {
@@ -30,16 +29,6 @@ class TicketController extends Controller
     {
         $ticket = TicketBusiness::getTicketById($id);
         return $this->sendSuccessResponse($ticket, 'Ticket recuperado com sucesso!');
-    }
-
-    /**
-     * Store a newly created ticket.
-     * @throws ValidationException - If the data is invalid.
-     */
-    public function store(Request $request): JsonResponse
-    {
-        $ticket = TicketBusiness::createTicket($request->all());
-        return $this->sendSuccessResponse($ticket, 'Ticket criado com sucesso!');
     }
 
     /**
