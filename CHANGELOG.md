@@ -49,6 +49,7 @@
 
 ### Miscellaneous
 
+- 📚 Atualizando CHANGELOG - Versão: v1.0.0 [[994302b](https://github.com/GustavoHBO/EventManagementSystem/commit/994302b3bdeed5a78c33ea27d4cc423cf8d2b6cb)]
 -  Merge branch &#x27;feature/gu/ConfigProj&#x27; into develop [[d2b1782](https://github.com/GustavoHBO/EventManagementSystem/commit/d2b17826683876c92db5bf0d53bc435df9cf2d25)]
 - 🧑‍💻 Variáveis de testes e credenciais de homologação. [[14b7dda](https://github.com/GustavoHBO/EventManagementSystem/commit/14b7dda154b8fe9ad76fde4154ed2ebd34ab37e9)]
 - 🤡 Factories para os modelos. [[4b7eed4](https://github.com/GustavoHBO/EventManagementSystem/commit/4b7eed44122e0cf2e34287fe048eb526b111eac5)]
