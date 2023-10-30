@@ -16,18 +16,16 @@ abstract class TestCase extends BaseTestCase
         $this->withHeaders(['Accept' => 'application/json']);
         setPermissionsTeamId(1);
         $this->actingAs($this->user);
-
-
 //         seed the database
-//        $this->artisan('migrate:fresh');
-//        $this->artisan('db:seed');
+        $this->artisan('migrate:fresh');
+        $this->artisan('db:seed');
 //         alternatively you can call
 //         $this->seed();
     }
 
     /**
      * Login and return the headers.
-     * @return TestCase - $thiszz
+     * @return TestCase - $this
      */
     public function login(): TestCase
     {

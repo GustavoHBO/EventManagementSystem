@@ -1,10 +1,11 @@
 # Changelog
 
-<a name="1.0.0"></a>
-## 1.0.0 (2023-10-30)
+<a name="1.0.1"></a>
+## 1.0.1 (2023-10-30)
 
 ### Added
 
+- ✅ Adicionando migration e seeders aos testes. [[ddf336f](https://github.com/GustavoHBO/EventManagementSystem/commit/ddf336f0c286ef534236fbd66a51e8fe583bafd0)]
 - ✨ Adicionando possibilidade de adicionar ou remover papéis ou permissões a usuário. [[3dde646](https://github.com/GustavoHBO/EventManagementSystem/commit/3dde646cfd10882b54d14e2c8f39a185f135edea)]
 - ✨ Removendo automaticamente pagamentos expirados. [[c3c2314](https://github.com/GustavoHBO/EventManagementSystem/commit/c3c23143846d2d25770052ea97636936f9b2ecb7)]
 - ✨ Adicionando notificações para os usuários. [[dc9dde4](https://github.com/GustavoHBO/EventManagementSystem/commit/dc9dde4d92b915650c7974c1f4126dbc9e9481c0)]
@@ -49,7 +50,9 @@
 
 ### Miscellaneous
 
-- 📚 Atualizando CHANGELOG - Versão: v1.0.0 [[994302b](https://github.com/GustavoHBO/EventManagementSystem/commit/994302b3bdeed5a78c33ea27d4cc423cf8d2b6cb)]
+- 📚 Atualizando CHANGELOG - Versão: v1.0.1 [[f0c0f7f](https://github.com/GustavoHBO/EventManagementSystem/commit/f0c0f7fa0228530dc7a4cf9ea8cd425d839eb28b)]
+-  Merge branch &#x27;feature/gu/updates&#x27; into develop [[0c0d25d](https://github.com/GustavoHBO/EventManagementSystem/commit/0c0d25d11920801bc1f2db8242db43f87ad4b922)]
+- 📝 Atualizando README. [[5d4e418](https://github.com/GustavoHBO/EventManagementSystem/commit/5d4e418e434f1aaaf50ac96273502d006dbbda9c)]
 -  Merge branch &#x27;feature/gu/ConfigProj&#x27; into develop [[d2b1782](https://github.com/GustavoHBO/EventManagementSystem/commit/d2b17826683876c92db5bf0d53bc435df9cf2d25)]
 - 🧑‍💻 Variáveis de testes e credenciais de homologação. [[14b7dda](https://github.com/GustavoHBO/EventManagementSystem/commit/14b7dda154b8fe9ad76fde4154ed2ebd34ab37e9)]
 - 🤡 Factories para os modelos. [[4b7eed4](https://github.com/GustavoHBO/EventManagementSystem/commit/4b7eed44122e0cf2e34287fe048eb526b111eac5)]
