@@ -1,9 +1,11 @@
 <?php
 
+use App\Http\Controllers\API\CouponController;
 use App\Http\Controllers\API\EventController;
 use App\Http\Controllers\API\LotController;
 use App\Http\Controllers\API\OrderController;
 use App\Http\Controllers\API\PaymentController;
+use App\Http\Controllers\API\RolePermissionController;
 use App\Http\Controllers\API\SectorController;
 use App\Http\Controllers\API\TeamController;
 use App\Http\Controllers\API\TicketController;
@@ -34,24 +36,33 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('logout', [AuthController::class, 'logout']);
+    Route::post('team', [AuthController::class, 'changeTeam']);
 
     Route::middleware(['teams_permission'])->group(function () {
         Route::apiResource('users', UserController::class);
         Route::apiResource('events', EventController::class);
         Route::apiResource('sectors', SectorController::class);
         Route::apiResource('lots', LotController::class);
-        Route::apiResource('tickets', TicketController::class);
+
+        Route::get('tickets/{id}', [TicketController::class, 'show']);
+        Route::get('tickets', [TicketController::class, 'index']);
+
         Route::apiResource('orders', OrderController::class);
         Route::apiResource('payments', PaymentController::class);
+
+        // Teams
         Route::post('teams/invite', [TeamController::class, 'inviteUser']);
         Route::delete('teams/withdraw', [TeamController::class, 'withdrawUser']);
         Route::apiResource('teams', TeamController::class);
+
+        // Coupons
+        Route::apiResource('coupons', CouponController::class);
     });
 
     // Roles
-    Route::get('/roles', 'API\RolePermissionController@getRoles');
-    Route::post('/roles', 'API\RolePermissionController@createRole');
-    Route::delete('/roles/{role}', 'API\RolePermissionController@deleteRole');
+    Route::get('/roles', [RolePermissionController::class, 'getRoles']);
+    Route::post('/roles', [RolePermissionController::class, 'createRole']);
+    Route::delete('/roles/{role}', [RolePermissionController::class, 'deleteRole']);
 
     // Permissions
     Route::get('/permissions', 'API\RolePermissionController@getPermissions');
