@@ -1,66 +1,145 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Event Management System
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+[Event Management System] is a [brief description of your project]. It is built using the Laravel PHP framework and provides [mention the primary features and purpose of the project].
 
-## About Laravel
+## Table of Contents
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- [Getting Started](#getting-started)
+  - [Prerequisites](#prerequisites)
+  - [Installation](#installation)
+- [Usage](#usage)
+- [Configuration](#configuration)
+- [Testing](#testing)
+- [Deployment](#deployment)
+- [Contributing](#contributing)
+- [License](#license)
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Getting Started
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### Prerequisites
 
-## Learning Laravel
+Before you begin, ensure you have met the following requirements:
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+- You have installed the latest version of [Composer](https://getcomposer.org/).
+- You have installed the latest version of [PHP](https://www.php.net/).
+- You have installed the latest version of [Git](https://git-scm.com/).
+- You have installed the latest version of [Node.js](https://nodejs.org/en/).
+- You have installed the latest version of [NPM](https://www.npmjs.com/).
+- You have installed the latest version of [MySQL](https://www.mysql.com/).
+- You have installed the latest version of [Redis](https://redis.io/).
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+### Installation
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 2000 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+To install [Event Management System], follow these steps:
 
-## Laravel Sponsors
+1. **Clone this repository:**
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell).
+   ```bash
+   git clone git@github.com:GustavoHBO/EventManagementSystem.git
+   ```
 
-### Premium Partners
+2. **Install project dependencies:**
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Cubet Techno Labs](https://cubettech.com)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[Many](https://www.many.co.uk)**
-- **[Webdock, Fast VPS Hosting](https://www.webdock.io/en)**
-- **[DevSquad](https://devsquad.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[OP.GG](https://op.gg)**
-- **[WebReinvent](https://webreinvent.com/?utm_source=laravel&utm_medium=github&utm_campaign=patreon-sponsors)**
-- **[Lendio](https://lendio.com)**
+   ```bash
+   sail up
+   ```
+
+3. **Copy the example environment file:**
+
+   ```bash
+   cp .env.example .env
+   ```
+
+4. **Generate an application key:**
+
+   ```bash
+   sail artisan key:generate
+   ```
+
+5. **Configure your `.env` file** with the necessary settings such as the database connection, mail, and other service configurations.
+
+6. **Migrate the database:**
+
+   ```bash
+   sail artisan migrate
+   ```
+
+7. **Seed the database (if needed):**
+
+   ```bash
+   sail artisan db:seed
+   ```
+
+## Usage
+
+To start the development server, run the following command:
+
+   ```bash
+   sail up -d
+   ```
+
+To stop the development server, run the following command:
+
+   ```bash
+    sail down
+  ```
+
+## Configuration
+
+To configure [Event Management System], follow these steps:
+
+1. **Configure your `.env` file** with the necessary settings such as the database connection, mail, and other service configurations.
+2. **Configure your `config` files** with the necessary settings such as the database connection, mail, and other service configurations.
+3. **Configure your `resources` files** with the necessary settings such as the database connection, mail, and other service configurations.
+4. **Configure your `routes` files** with the necessary settings such as the database connection, mail, and other service configurations.
+5. **Configure your `app` files** with the necessary settings such as the database connection, mail, and other service configurations.
+
+To login as an administrator, use the following credentials:
+
+```bash
+Email: ENV('ADMIN_EMAIL')
+Password: ENV('ADMIN_PASSWORD')
+```
+
+This command using CURL:
+
+```bash
+curl --location --request POST 'http://localhost:8000/api/login' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    "email": "ENV('ADMIN_EMAIL')",
+    "password": "ENV('ADMIN_PASSWORD')"
+}'
+```
+
+Get the full rotes in this document Postman:
+
+```bash
+https://api.postman.com/collections/30167526-da1e8899-a9ba-4f68-b4f5-9ce3bfe5267c?access_key=PMAT-01HE1B78MPJZD1PKPG7XYF3SN0
+```
+Each route has the headers configured with the token, so you can test the routes without having to log in again.
+The adicional data is sent in headers, look the pre-request and post-request in each route.
+
+## Testing
+
+To run the tests, use the following command:
+
+```bash
+sail test
+```
+
+## Deployment
+
+Run the following command to deploy [Event Management System]:
+
+```bash
+sail up -d
+```
 
 ## Contributing
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
-
-## Code of Conduct
-
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+Contributions are welcome! Please see our [contributing guidelines](CONTRIBUTING.md).
 
 ## License
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+This project is licensed under the [GNU 3.0] License - see the [LICENSE](LICENSE) file for details.
