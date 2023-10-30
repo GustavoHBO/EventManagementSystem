@@ -64,6 +64,11 @@ class BasicPermissionSeeder extends Seeder
             'ticket configure sales',
             // Sales
             'sale receive notifications',
+            // Coupons
+            'coupon create',
+            'coupon list',
+            'coupon edit',
+            'coupon delete',
             // Permissions
             'permission manage',
             'permission list',
@@ -120,6 +125,12 @@ class BasicPermissionSeeder extends Seeder
             'ticket list',
             'ticket delete',
             'sale receive notifications',
+            // Teams
+            'team create',
+            'team list',
+            'team delete',
+            'team invite',
+            'team withdraw',
         ];
         foreach ($permissionsClient as $permission) {
             $roleClient->givePermissionTo($permission);

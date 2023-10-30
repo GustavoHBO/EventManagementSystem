@@ -13,8 +13,8 @@ class AdminUserSeeder extends Seeder
     public function run(): void
     {
         // Create an admin user
-        $user = User::find(1);
-        User::find(1)->exists || User::create([
+        User::find(1)->exists ?? User::firstOrCreate([
+            'id' => 1,
             'name' => 'Admin User',
             'email' => 'admin@example.com',
             'password' => bcrypt(env('ADMIN_DEFAULT_PASSWORD') ?? 'password'), // Replace with a secure password
