@@ -3,24 +3,21 @@
 namespace Tests;
 
 use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 
 abstract class TestCase extends BaseTestCase
 {
-    use CreatesApplication;
+    use CreatesApplication, RefreshDatabase;
 
     public function setUp(): void
     {
         parent::setUp();
+        $this->artisan('migrate:fresh');
+        $this->artisan('db:seed');
         $this->user = User::find(1);
         $this->withHeaders(['Accept' => 'application/json']);
         setPermissionsTeamId(1);
-        $this->actingAs($this->user);
-//         seed the database
-        $this->artisan('migrate:fresh');
-        $this->artisan('db:seed');
-//         alternatively you can call
-//         $this->seed();
     }
 
     /**

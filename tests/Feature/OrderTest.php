@@ -130,7 +130,7 @@ class OrderTest extends TestCase
 
         $this->assertEquals($paymentByUUID->status_id, $order->payment->paymentStatus()->get()->first()->id);
 
-        $this->assertEquals($order->payment->id, $paymentByUUID->order()->get()->first()->id);
+        $this->assertEquals($order->payment->id, $paymentByUUID->order()->get()->first()->payment_id);
 
         $this->assertEquals($order->user, $this->user);
         $this->assertEquals(0, $order->couponUsages()->count());
