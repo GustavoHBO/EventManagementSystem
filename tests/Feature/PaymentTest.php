@@ -2,6 +2,11 @@
 
 namespace Tests\Feature;
 
+use App\Models\Payment;
+use App\Models\PaymentMethod;
+use Brick\Math\BigInteger;
+use Brick\Math\Exception\MathException;
+use Str;
 use Tests\TestCase;
 
 class PaymentTest extends TestCase
@@ -18,11 +23,19 @@ class PaymentTest extends TestCase
 
     /**
      * Get a payment by id.
+     * @throws MathException
      */
     public function test_get_payment_by_id()
     {
-        $response = $this->login()->get('/api/payments/1');
-
+        $method = PaymentMethod::first();
+        $payment = Payment::firstOrCreate([
+            'uuid' => (string)Str::uuid(), // Unique identifier of the payment.
+            'team_id' => getPermissionsTeamId(),
+            'payment_method_id' => $method->id,
+            'status_id' => Payment::PENDING, // Status of the payment (1 = Pending, 2 = Paid, 3 = Canceled).
+            'amount' => BigInteger::randomRange(0, 100), // The amount of the payment.
+        ]);
+        $response = $this->login()->get("/api/payments/". $payment->id);
         $response->assertStatus(200);
     }
 

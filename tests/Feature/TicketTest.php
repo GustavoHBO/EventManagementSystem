@@ -15,7 +15,43 @@ class TicketTest extends TestCase
      */
     public function testGetAllTickets()
     {
-        $response = $this->login()->get('/api/tickets');
+        $response = $this->login()->post('/api/events', [
+            'name' => 'Event Test',
+            'datetime' => '2021-12-31 23:59:59',
+            'location' => 'Event Test Location',
+            'banner' => 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD',
+            'lots' => [
+                [
+                    'name' => 'Lot Test',
+                    'available_tickets' => 100,
+                    'expiration_date' => '2021-12-31',
+                    'ticket_prices' => [
+                        [
+                            'sector' => [
+                                'name' => 'Sector Test',
+                                'capacity' => 100
+                            ],
+                            'price' => '10.00'
+                        ],
+                    ],
+                ],
+            ],
+        ]);
+
+        $response->assertStatus(201);
+        $ticketPriceId = $response->json('data.lots.0.tickets.0.id');
+
+        $response = $this->post('/api/orders', [
+            'payment_method_id' => 1,
+            'order_items' => [
+                [
+                    'ticket_price_id' => $ticketPriceId,
+                    'quantity' => 1,
+                ],
+            ],
+        ]);
+        $response->assertStatus(201);
+        $response = $this->get('/api/tickets');
         $ticketId = $response->json('data.0.id');
         $ticket = Ticket::find($ticketId);
         $this->assertEquals($ticket->user->id, $ticket->user()->get()->first()->id);
@@ -34,7 +70,45 @@ class TicketTest extends TestCase
      */
     public function testGetTicketById()
     {
-        $response = $this->login()->get('/api/tickets/1');
+        $response = $this->login()->post('/api/events', [
+            'name' => 'Event Test',
+            'datetime' => '2021-12-31 23:59:59',
+            'location' => 'Event Test Location',
+            'banner' => 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD',
+            'lots' => [
+                [
+                    'name' => 'Lot Test',
+                    'available_tickets' => 100,
+                    'expiration_date' => '2021-12-31',
+                    'ticket_prices' => [
+                        [
+                            'sector' => [
+                                'name' => 'Sector Test',
+                                'capacity' => 100
+                            ],
+                            'price' => '10.00'
+                        ],
+                    ],
+                ],
+            ],
+        ]);
+
+        $response->assertStatus(201);
+        $ticketPriceId = $response->json('data.lots.0.tickets.0.id');
+
+        $response = $this->post('/api/orders', [
+            'payment_method_id' => 1,
+            'order_items' => [
+                [
+                    'ticket_price_id' => $ticketPriceId,
+                    'quantity' => 1,
+                ],
+            ],
+        ]);
+        $response->assertStatus(201);
+        $response = $this->get('/api/tickets');
+        $ticketId = $response->json('data.0.id');
+        $response = $this->get('/api/tickets/'.$ticketId);
 
         $response->assertStatus(200);
     }

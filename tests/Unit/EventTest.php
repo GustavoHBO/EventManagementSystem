@@ -16,6 +16,7 @@ class EventTest extends TestCase
     public function test_get_available_lots_to_sale()
     {
         try {
+            $this->actingAs($this->user);
             $event = EventBusiness::createEvent([
                 'name' => 'Event Test',
                 'datetime' => now()->addDays(),
@@ -50,6 +51,7 @@ class EventTest extends TestCase
     public function test_get_user()
     {
         try {
+            $this->actingAs($this->user);
             $event = EventBusiness::createEvent([
                 'name' => 'Event Test',
                 'datetime' => now()->addDays(),
@@ -74,6 +76,7 @@ class EventTest extends TestCase
             ]);
             $this->assertEquals(Auth::user()->id, $event->user()->get()->first()->id);
         } catch (ValidationException|Throwable $e) {
+            dd($e);
             $this->fail();
         }
     }
@@ -84,6 +87,8 @@ class EventTest extends TestCase
     public function test_get_team()
     {
         try {
+            $this->actingAs($this->user);
+
             $event = EventBusiness::createEvent([
                 'name' => 'Event Test',
                 'datetime' => now()->addDays(),
@@ -107,7 +112,7 @@ class EventTest extends TestCase
                 ],
             ]);
             $this->assertEquals(getPermissionsTeamId(), $event->team_id);
-        } catch (ValidationException|\Throwable $e) {
+        } catch (ValidationException|Throwable $e) {
             $this->fail();
         }
     }
@@ -118,6 +123,7 @@ class EventTest extends TestCase
     public function test_get_coupons()
     {
         try {
+            $this->actingAs($this->user);
             $event = EventBusiness::createEvent([
                 'name' => 'Event Test',
                 'datetime' => now()->addDays(),
@@ -141,7 +147,7 @@ class EventTest extends TestCase
                 ],
             ]);
             $this->assertEquals(0, $event->coupons()->get()->count());
-        } catch (ValidationException|\Throwable $e) {
+        } catch (ValidationException|Throwable $e) {
             $this->fail();
         }
     }
