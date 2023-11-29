@@ -1,0 +1,11 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Main" type="PHPUnitRunConfigurationType" factoryName="PHPUnit" singleton="false">
+    <CommandLine>
+      <PhpTestInterpreterSettings>
+        <option name="interpreterName" value="Docker Compose PHP" />
+      </PhpTestInterpreterSettings>
+    </CommandLine>
+    <TestRunner configuration_file="$PROJECT_DIR$/phpunit.xml" directory="$PROJECT_DIR$/tests" scope="XML" use_alternative_configuration_file="true" />
+    <method v="2" />
+  </configuration>
+</component>
